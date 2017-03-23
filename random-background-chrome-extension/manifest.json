@@ -1,0 +1,54 @@
+{
+    "manifest_version": 2,
+    "name": "__MSG_appName__",
+    "description": "__MSG_appDesc__",
+    "version": "0.4",
+    "default_locale": "zh_CN",
+    "icons": {
+        "128": "icon.png"
+    },
+    "browser_action": {
+        "default_icon": "icon.png"
+    },
+    "permissions": [
+        "<all_urls>",
+        "webRequestBlocking",
+        "webRequest"
+    ],
+    "optional_permissions": [
+        "background"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "*://*/_/chrome/newtab*"
+            ],
+            "js": [
+                "lib/jquery-3.2.0.min.js",
+                "lib/vue.min.js",
+                "lib/utils.js",
+                "lib/material.min.js",
+                "cs/main.js"
+            ],
+            "css": [
+                "lib/material.min.css",
+                "cs/main.css"
+            ]
+        }
+    ],
+    "background": {
+        "scripts": [
+            "lib/utils.js",
+            "lib/jquery-3.2.0.min.js",
+            "bg/imageUrlLoader.js",
+            "bg/bingImageUrl.js",
+            "bg/artstationImageUrl.js",
+            "bg/pixivImageUrl.js",
+            "bg/customImageUrl.js",
+            "bg/background.js"
+        ]
+    },
+    "web_accessible_resources": [
+        "cs/setting.html"
+    ]
+}
