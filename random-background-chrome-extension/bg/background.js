@@ -2,6 +2,16 @@ var MAX_CACHE = 5;
 var MAX_RECURSIVE = 20;
 var CACHE_TIMEOUT = 15000;
 var sources = [bing, artstation, pixiv, custom];
+var rootSetting = {
+    sources: sources,
+    settings: {
+        _wallpaperUpdateTime: 60 * 1000,
+        _applyOnDesktopWallpaper: true,
+        _applyOnGoogle: true
+    }
+}
+var tick = 0;
+var wallpaperTimer = null;
 var datas = [];
 var urls = [];
 var cache_urls = [];
@@ -10,22 +20,37 @@ start();
 storeData(0);
 
 function start() {
+    var promises = [];
     for (var i = 0; i < sources.length; i++) {
         var storedRule = localStorage.getItem(sources[i].api.name);
         if (storedRule) {
             sources[i].api = JSON.parse(storedRule);
         }
         if (sources[i].start) {
-            sources[i].start();
+            promises.push(sources[i].start());
         }
     }
+    var settings = localStorage.getItem('settings');
+    if (settings) {
+        _copyJSON(rootSetting.settings, JSON.parse(settings));
+    }
+    // Begin to send wallpaper to desktop after prepared
+    Promise.all(promises).then(function () {
+        wallpaperTimer = setTimeout(sendWallpaper, rootSetting.settings._wallpaperUpdateTime);
+    })
 }
 
-function applySetting(settings) {
+function applySetting(setting) {
     for (var i = 0; i < sources.length; i++) {
-        sources[i].api = settings[i];
+        sources[i].api = setting.sources[i];
         _setLocalStorage(sources[i].api.name, sources[i].api);
     }
+    if (rootSetting.settings._wallpaperUpdateTime !== setting.settings._wallpaperUpdateTime) {
+        clearTimeout(wallpaperTimer);
+        wallpaperTimer = setTimeout(sendWallpaper, setting.settings._wallpaperUpdateTime);
+    }
+    rootSetting.settings = setting.settings;
+    _setLocalStorage("settings", rootSetting.settings);
 }
 
 function randomChooseSource() {
@@ -95,8 +120,7 @@ function storeData(roop = 0) {
                 if (oReq.status === 200) {
                     var arrayBuffer = oReq.response; // Note: not oReq.responseText
                     var base64str = _arrayBufferToBase64(arrayBuffer);
-                    var data = 'data:image/png;base64,' + base64str;
-                    url.data = data;
+                    url.data = base64str;
                     resolve(url)
                 } else {
                     resolve(url);
@@ -165,11 +189,13 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.type === 'QUERY_SETTINGS') {
-        var settings = [];
+        var setting = {};
+        setting.sources = [];
+        setting.settings = rootSetting.settings;
         for (var i = 0; i < sources.length; i++) {
-            settings.push(sources[i].api);
+            setting.sources.push(sources[i].api);
         }
-        sendResponse(settings);
+        sendResponse(setting);
         return true;
     }
 })
@@ -178,18 +204,22 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     if (request.type === 'APPLY_SETTINGS') {
         applySetting(request.data);
     }
-})
+});
 
-chrome.webRequest.onBeforeSendHeaders.addListener(function (details) {
-    for (var i = 0; i < details.requestHeaders.length; ++i) {
-        if (details.requestHeaders[i].name === "Referer") {
-            details.requestHeaders[i].value = "https://pixiv.net/"
+function sendWallpaper() {
+    if (rootSetting.settings._applyOnDesktopWallpaper) {
+        if (datas.length > 0) {
+            var wallpaper = datas.shift();
+            wallpaper.tick = tick;
+            tick++;
+
+            chrome.runtime.sendNativeMessage('com.lisheng.wallpaper_receiver', wallpaper, function (reply) {
+                console.warn(reply);
+            });
+            storeData();
+        } else {
+            storeData();
         }
     }
-    return { requestHeaders: details.requestHeaders };
-},
-    {
-        urls: ["*://*.pixiv.net/*"]
-    },
-    ["blocking", "requestHeaders"]
-);
+    wallpaperTimer = setTimeout(sendWallpaper, rootSetting.settings._wallpaperUpdateTime);
+}

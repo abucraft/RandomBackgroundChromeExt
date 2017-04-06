@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "__MSG_appName__",
     "description": "__MSG_appDesc__",
-    "version": "0.4",
+    "version": "0.6",
     "default_locale": "zh_CN",
     "icons": {
         "128": "icon.png"
@@ -13,7 +13,9 @@
     "permissions": [
         "<all_urls>",
         "webRequestBlocking",
-        "webRequest"
+        "webRequest",
+        "tabs",
+        "nativeMessaging"
     ],
     "optional_permissions": [
         "background"
@@ -28,10 +30,13 @@
                 "lib/vue.min.js",
                 "lib/utils.js",
                 "lib/material.min.js",
-                "cs/main.js"
+                "cs/cacheLoader.js",
+                "cs/main.js",
+                "cs/imageLoader.js"
             ],
             "css": [
                 "lib/material.min.css",
+                "lib/material-select.min.css",
                 "cs/main.css"
             ]
         }
@@ -45,7 +50,9 @@
             "bg/artstationImageUrl.js",
             "bg/pixivImageUrl.js",
             "bg/customImageUrl.js",
-            "bg/background.js"
+            "bg/background.js",
+            "bg/headerModifier.js",
+            "bg/scriptInjector.js"
         ]
     },
     "web_accessible_resources": [

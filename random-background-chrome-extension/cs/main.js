@@ -1,35 +1,13 @@
-var testUrl = "https://cdna.artstation.com/p/assets/images/images/004/557/740/large/philipp-schmidt-philipp-schmidt-highresscreenshot00007.jpg?1484579584";
-var testUrl2 = "https://i3.pixiv.net/img-original/img/2017/02/19/18/34/26/61536966_p0.png"
-var CACHE_INTERVAL = 10000;
-var ONE_MINITE = 60 * 1000;
-var ITEM_HEIGHT = 56;
-chrome.runtime.sendMessage({ type: 'QUERY' }, function (response) {
-    onloadImage(response);
-})
-function loadCache() {
-    chrome.runtime.sendMessage({ type: 'CACHE_REQUEST' }, function (response) {
-        if (response) {
-            var url = response;
-            var oReq = new XMLHttpRequest();
-            oReq.open("GET", url.url, true);
-            oReq.responseType = "arraybuffer";
-            oReq.onload = function (oEvent) {
-                var arrayBuffer = oReq.response; // Note: not oReq.responseText
-                var base64str = _arrayBufferToBase64(arrayBuffer);
-                var data = 'data:image/png;base64,' + base64str;
-                url.data = data;
-                chrome.runtime.sendMessage({ type: 'CACHE_RESULT', data: url })
-            };
-            oReq.send();
-        }
-    })
+if (vm) {
+    throw '[Random Background]:vm has been defined';
 }
-loadCache();
-setInterval(loadCache, CACHE_INTERVAL);
+var ORIGIN_URL = window.location.href;
 
-var canvas = document.createElement('canvas');
-var ctx = canvas.getContext('2d');
-var img = new Image();
+var SECOND = 1000;
+var MINUTE = 60 * SECOND;
+var HOUR = 60 * MINUTE;
+var ITEM_HEIGHT = 56;
+
 var vm = {};
 vm.strings = {
     background_settings: 'background settings',
@@ -46,111 +24,28 @@ vm.strings = {
     ok_zh: '确认',
     cancel: 'cancel',
     cancel_zh: '取消',
+    update_time: "update time",
+    update_time_zh: "更新频率",
+    second: "second",
+    second_zh: "秒",
+    minute: "minute",
+    minute_zh: "分钟",
+    hour: "hour",
+    hour_zh: "小时",
+    apply_on_google: 'apply on google',
+    apply_on_google_zh: '应用于谷歌首页',
+    apply_on_desktop_wallpaper: 'apply on desktop wallpaper',
+    apply_on_desktop_wallpaper_zh: '应用于桌面背景',
+
 }
 vm.items = [];
+vm.settings = { _applyOnGoogle: true, _applyOnDesktopWallpaper: true, _wallpaperUpdateTime: MINUTE }
+vm.timeSegments = [0.5 * MINUTE, 5 * MINUTE, 30 * MINUTE, 60 * MINUTE, 3 * 60 * MINUTE, 12 * 60 * MINUTE];
 vm.newCustomUrl = '';
+vm.SECOND = SECOND;
+vm.MINUTE = MINUTE;
+vm.HOUR = HOUR;
 vm.image = {};
-function onloadImage(data) {
-    vm.image = data;
-    console.log(data);
-    var imageSrc = data.data || data.url;
-    $(`<style type="text/css">body{ background-image:url(${imageSrc}) !important;background-size:cover !important; }  </style>`).appendTo($('body'));
-    img.onload = function () {
-        watchDom();
-    }
-    if (data.data) {
-        img.src = data.data;
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-    } else {
-        var oReq = new XMLHttpRequest();
-        oReq.open("GET", data.url, true);
-        oReq.responseType = "arraybuffer";
-        oReq.onload = function (oEvent) {
-            var arrayBuffer = oReq.response; // Note: not oReq.responseText
-            var base64str = _arrayBufferToBase64(arrayBuffer);
-            var data = 'data:image/png;base64,' + base64str;
-            img.src = data;
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-        };
-        oReq.send();
-        oReq.onerror = function (e) {
-            console.error(e);
-        };
-    }
-    var interval = setInterval(function () {
-        watchDom();
-        setTimeout(function () {
-            clearInterval(interval)
-        }, ONE_MINITE);
-    }, 1000)
-    $(window).on('resize', watchDom);
-}
-
-function watchDom() {
-    changeElementFontColor($('#mngb > div > div > div'));
-    changeElementFontColor($('#setting-panel > .mdl-button'));
-}
-
-function changeElementFontColor(elm) {
-    var rect = element2ImageRect(elm);
-    if (rect && rect.width && rect.height) {
-        var imageData = ctx.getImageData(rect.left, rect.top, rect.width, rect.height);
-        var total = imageData.height * imageData.width;
-        var red = 0;
-        var green = 0;
-        var blue = 0;
-        for (var i = 0; i < total; i++) {
-            red += imageData.data[i * 4];
-            green += imageData.data[i * 4 + 1];
-            blue += imageData.data[i * 4 + 2];
-        }
-        red = red / total;
-        green = green / total;
-        blue = blue / total;
-        var average = red * 0.299 + green * 0.587 + blue * 0.114;
-        var jqElm = $(elm);
-        if (average < 128) {
-            jqElm.css('color', 'white');
-            jqElm.css('fill', 'white');
-            jqElm.find('a').css('color', 'white');
-            jqElm.find('span').css('color', 'white');
-        } else {
-            jqElm.css('color', '');
-            jqElm.css('fill', '');
-            jqElm.find('a').css('color', '');
-            jqElm.find('span').css('color', '');
-        }
-    }
-}
-
-function element2ImageRect(elm) {
-    var elm = $(elm);
-    if (elm.length > 0) {
-        var elmRect = elm[0].getClientRects()[0];
-        var windowHeight = window.innerHeight;
-        var windowWidth = window.innerWidth;
-        var imgWidth = img.width;
-        var imgHeight = img.height;
-        if (windowWidth > imgWidth) {
-            var rect = {};
-            var scale = windowWidth / imgWidth;
-            rect.left = elmRect.left / scale;
-            rect.top = elmRect.top / scale;
-            rect.width = elmRect.width / scale;
-            rect.height = elmRect.height / scale;
-            return rect;
-        } else {
-            return elmRect;
-        }
-    }
-    return null;
-}
-
-
 
 Vue.directive('mdl', {
     inserted: function (el) {
@@ -159,6 +54,53 @@ Vue.directive('mdl', {
         }
     }
 });
+
+Vue.directive('mdl-select', {
+    inserted: function (el) {
+        if (el) {
+            componentHandler.upgradeElement(el);
+            var input = el.querySelector('input');
+            var list = el.querySelectorAll('li');
+            var menu = el.querySelector('.mdl-js-menu');
+            input.onkeydown = function (event) {
+                if (event.keyCode == 38 || event.keyCode == 40) {
+                    menu['MaterialMenu'].show();
+                }
+            };
+
+            //return focus to input
+            menu.onkeydown = function (event) {
+                if (event.keyCode == 13) {
+                    input.focus();
+                }
+            };
+
+            [].forEach.call(list, function (li) {
+                li.onclick = function () {
+                    input.value = li.textContent;
+                    el.MaterialTextfield.change(li.textContent); // handles css class changes
+                    setTimeout(function () {
+                        el.MaterialTextfield.updateClasses_(); //update css class
+                    }, 250);
+
+                    // update input with the "id" value
+                    input.dataset.val = li.dataset.val || '';
+
+                    if ("createEvent" in document) {
+                        var evt = document.createEvent("HTMLEvents");
+                        evt.initEvent("change", false, true);
+                        menu['MaterialMenu'].hide();
+                        input.dispatchEvent(evt);
+                    } else {
+                        input.fireEvent("onchange");
+                    }
+                };
+            });
+            var width = (el.querySelector('.mdl-menu').offsetWidth ? el.querySelector('.mdl-menu').offsetWidth : getmdlSelect.defaultValue.width);
+            el.style.width = width + 'px'
+        }
+    }
+})
 
 function reheightBinding(el, binding) {
     if (binding.value.index === binding.value.item.apis.length - 1) {
@@ -172,12 +114,22 @@ Vue.directive('reheight',
         inserted: reheightBinding,
         update: reheightBinding,
         unbind: reheightBinding
-    })
+    });
+Vue.directive('mdl-check-refresh', {
+    update: function (el, binding) {
+        var checked = binding.value.value;
+        if ($(el).parent().hasClass('is-checked') !== checked) {
+            $(el).parent().toggleClass('is-checked');
+        }
+    }
+})
 
 
 function querySettings() {
     chrome.runtime.sendMessage({ type: 'QUERY_SETTINGS' }, function (response) {
-        vm.items = response;
+        vm.items = response.sources;
+        console.log(response.settings)
+        vm.settings = response.settings;
     })
 }
 
@@ -226,6 +178,16 @@ querySettings();
 
 $.get(chrome.runtime.getURL('cs/setting.html'), function (data) {
     $('body').append(data);
+    // clean background when do google search
+    var urlWatcher = setInterval(function () {
+        var url = window.location.href;
+        if (url !== ORIGIN_URL) {
+            console.log('[Random Background]:remove all');
+            $('#setting-panel').remove();
+            $('#rbkstyle').remove();
+            clearInterval(urlWatcher)
+        }
+    }, 500);
     var vapp = new Vue({
         el: '#setting-panel',
         data: vm,
@@ -246,7 +208,8 @@ $.get(chrome.runtime.getURL('cs/setting.html'), function (data) {
                 updateSubListHeight(current.next().children()[0]);
             },
             apply: function () {
-                chrome.runtime.sendMessage({ type: 'APPLY_SETTINGS', data: vm.items });
+                console.log(vm.settings._applyOnGoogle);
+                chrome.runtime.sendMessage({ type: 'APPLY_SETTINGS', data: { sources: vm.items, settings: vm.settings } });
                 hideDrawer();
             },
             refresh: function () {
@@ -284,7 +247,27 @@ $.get(chrome.runtime.getURL('cs/setting.html'), function (data) {
                     postfixed = key + '_zh';
                 }
                 return store[postfixed] ? store[postfixed] : store[key];
+            },
+            timeToString: function (time) {
+                var hour = parseInt(time / HOUR);
+                if (hour) {
+                    return hour + this.getString(this.strings, 'hour');
+                }
+                var minute = parseInt(time / MINUTE);
+                if (minute) {
+                    return minute + this.getString(this.strings, 'minute');
+                }
+                var second = parseInt(time / SECOND);
+                if (second) {
+                    return second + this.getString(this.strings, 'second');
+                }
+                return "";
+            },
+            wallpaperTimeChange: function (event) {
+                var dataval = event.target.dataset.val;
+                this.settings._wallpaperUpdateTime = parseInt(dataval);
             }
         }
     })
 })
+

@@ -63,3 +63,17 @@ function _setLocalStorage(path, value) {
     }
     localStorage.setItem(key, finalValue);
 }
+
+function _copyJSON(dest, src) {
+    Object.keys(src).forEach(function (key) {
+        if (dest[key]) {
+            if (typeof dest[key] === 'object') {
+                _copyJSON(dest[key], src[key]);
+            } else {
+                dest[key] = src[key];
+            }
+        } else {
+            dest[key] = src[key];
+        }
+    })
+}

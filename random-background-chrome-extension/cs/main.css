@@ -1,3 +1,8 @@
+#setting-panel{
+    position: fixed;
+    z-index: 1024;
+}
+
 .top-left {
     position: fixed;
     top: 10px;
@@ -34,6 +39,10 @@
     padding-left: 0px;
 }
 
+.mdl-layout-title{
+    text-align: center;
+}
+
 .mdl-layout-title > span{
     width: 344px;
 }
@@ -42,6 +51,10 @@
 .mdl-checkbox{
     width: auto;
     line-height: 20px;
+}
+
+.item-checkbox{
+    width:324px;
 }
 
 .mdl-textfield{
@@ -68,18 +81,25 @@
     width: 16px;
 }
 
+.half-place-holder{
+    display: inline-block;
+    margin-left: 0px;
+    margin-right: 5px;
+    width: 16px;
+}
+
 .item > span{
     vertical-align: middle;
 }
 
 .sub{
-    overflow: hidden;
     background: rgba(0, 0, 0, 0.1);
     transition: height 0.2s ease;
 }
 
 .sub.closed {
     height: 0px;
+    overflow: hidden;
 }
 
 .bottom-border{
