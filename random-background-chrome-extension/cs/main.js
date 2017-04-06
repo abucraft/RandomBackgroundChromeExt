@@ -40,7 +40,7 @@ vm.strings = {
 }
 vm.items = [];
 vm.settings = { _applyOnGoogle: true, _applyOnDesktopWallpaper: true, _wallpaperUpdateTime: MINUTE }
-vm.timeSegments = [0.5 * MINUTE, 5 * MINUTE, 30 * MINUTE, 60 * MINUTE, 3 * 60 * MINUTE, 12 * 60 * MINUTE];
+vm.timeSegments = [0.5 * MINUTE, 5 * MINUTE, 15 * MINUTE, 30 * MINUTE, 60 * MINUTE, 3 * 60 * MINUTE, 12 * 60 * MINUTE];
 vm.newCustomUrl = '';
 vm.SECOND = SECOND;
 vm.MINUTE = MINUTE;
