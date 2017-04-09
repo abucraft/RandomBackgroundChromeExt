@@ -83,14 +83,18 @@ function getData() {
 }
 
 function pickData() {
-    if (datas.length > 0) {
-        var data = datas.shift();
-        storeData(0);
-        return data;
+    storeData(0);
+    if (datas.length > 0 && urls.length > 0) {
+        var fromUrl = parseInt(Math.random() * 2);
+        if (fromUrl) {
+            return urls.shift();
+        } else {
+            return datas.shift();
+        }
+    } else if (datas.length > 0) {
+        return datas.shift();
     } else if (urls.length > 0) {
-        var url = urls.shift();
-        storeData(0);
-        return url;
+        return urls.shift();
     }
 }
 
@@ -208,18 +212,15 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 function sendWallpaper() {
     if (rootSetting.settings._applyOnDesktopWallpaper) {
-        if (datas.length > 0) {
-            var wallpaper = datas.shift();
+        var wallpaper = pickData();
+        if (wallpaper) {
             wallpaper.tick = tick;
             tick++;
-
             chrome.runtime.sendNativeMessage('com.lisheng.wallpaper_receiver', wallpaper, function (reply) {
                 console.warn(reply);
             });
-            storeData();
-        } else {
-            storeData();
         }
+        storeData();
     }
     wallpaperTimer = setTimeout(sendWallpaper, rootSetting.settings._wallpaperUpdateTime);
 }
