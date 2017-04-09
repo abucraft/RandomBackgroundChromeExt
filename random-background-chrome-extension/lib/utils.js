@@ -35,6 +35,7 @@ function _randomPick(list, limit) {
         }
         var idx = parseInt(Math.random() * list.length);
         nList.push(list[idx]);
+        list.splice(idx, 1);
     }
     return nList;
 }
