@@ -39,7 +39,7 @@ vm.strings = {
 
 }
 vm.items = [];
-vm.settings = { _applyOnGoogle: true, _applyOnDesktopWallpaper: true, _wallpaperUpdateTime: MINUTE }
+vm.settings = { applyOnGoogle: true, applyOnDesktopWallpaper: true, wallpaperUpdateTime: MINUTE }
 vm.timeSegments = [0.5 * MINUTE, 5 * MINUTE, 15 * MINUTE, 30 * MINUTE, 60 * MINUTE, 3 * 60 * MINUTE, 12 * 60 * MINUTE];
 vm.newCustomUrl = '';
 vm.SECOND = SECOND;
@@ -208,7 +208,6 @@ $.get(chrome.runtime.getURL('cs/setting.html'), function (data) {
                 updateSubListHeight(current.next().children()[0]);
             },
             apply: function () {
-                console.log(vm.settings._applyOnGoogle);
                 chrome.runtime.sendMessage({ type: 'APPLY_SETTINGS', data: { sources: vm.items, settings: vm.settings } });
                 hideDrawer();
             },
@@ -265,7 +264,7 @@ $.get(chrome.runtime.getURL('cs/setting.html'), function (data) {
             },
             wallpaperTimeChange: function (event) {
                 var dataval = event.target.dataset.val;
-                this.settings._wallpaperUpdateTime = parseInt(dataval);
+                this.settings.wallpaperUpdateTime = parseInt(dataval);
             }
         }
     })

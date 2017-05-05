@@ -72,15 +72,15 @@
         </div>
         <div class="item top-border">
             <div class="place-holder"></div>
-            <label class="mdl-checkbox mdl-js-checkbox" for="_applyOnGoogle" v-mdl>
-                    <input id="_applyOnGoogle" type="checkbox" class="mdl-checkbox__input" v-mdl-check-refresh="{value:settings._applyOnGoogle}" v-model="settings._applyOnGoogle"/>
+            <label class="mdl-checkbox mdl-js-checkbox" for="applyOnGoogle" v-mdl>
+                    <input id="applyOnGoogle" type="checkbox" class="mdl-checkbox__input" v-mdl-check-refresh="{value:settings.applyOnGoogle}" v-model="settings.applyOnGoogle"/>
                     <span class="mdl-checkbox__label">{{getString(strings,'apply_on_google')}}</span>
             </label>
         </div>
         <div class="item">
             <div class="place-holder"></div>
-            <label class="mdl-checkbox mdl-js-checkbox item-checkbox" for="_applyOnDesktopWallpaper" v-mdl>
-                <input id="_applyOnDesktopWallpaper" type="checkbox" class="mdl-checkbox__input" v-mdl-check-refresh="{value:settings._applyOnDesktopWallpaper}" v-model="settings._applyOnDesktopWallpaper"/>
+            <label class="mdl-checkbox mdl-js-checkbox item-checkbox" for="applyOnDesktopWallpaper" v-mdl>
+                <input id="applyOnDesktopWallpaper" type="checkbox" class="mdl-checkbox__input" v-mdl-check-refresh="{value:settings.applyOnDesktopWallpaper}" v-model="settings.applyOnDesktopWallpaper"/>
                 <span class="mdl-checkbox__label">{{getString(strings,'apply_on_desktop_wallpaper')}}</span>
             </label>
             <button class="mdl-button mdl-js-button mdl-button--icon collapse closed" v-on:click="collapse" v-mdl>
@@ -93,15 +93,15 @@
                     <div class="place-holder"></div>
                     <span class="item-name">{{getString(strings,'update_time')}}</span>
                     <div class="mdl-textfield mdl-js-textfield getmdl-select" style="padding-top:0px;padding-bottom:18px" v-mdl-select>
-                        <input class="mdl-textfield__input" type="text" id="_wallpaperUpdateTime" v-bind:value="timeToString(settings._wallpaperUpdateTime)"
+                        <input class="mdl-textfield__input" type="text" id="wallpaperUpdateTime" v-bind:value="timeToString(settings.wallpaperUpdateTime)"
                             v-on:change="wallpaperTimeChange" readonly tabIndex="-1">
-                        <label class="mdl-textfield__label" for="_wallpaperUpdateTime"></label>
-                        <label for="_wallpaperUpdateTime">
+                        <label class="mdl-textfield__label" for="wallpaperUpdateTime"></label>
+                        <label for="wallpaperUpdateTime">
                             <i class="mdl-icon-toggle__label material-icons">
                                 &#9662
                             </i>
                         </label>
-                        <ul for="_wallpaperUpdateTime" class="mdl-menu mdl-menu--bottom-left mdl-js-menu" v-mdl>
+                        <ul for="wallpaperUpdateTime" class="mdl-menu mdl-menu--bottom-left mdl-js-menu" v-mdl>
                             <li v-for="time in timeSegments" class="mdl-menu__item" v-bind:data-val="time">{{timeToString(time)}}</li>
                         </ul>
                     </div>

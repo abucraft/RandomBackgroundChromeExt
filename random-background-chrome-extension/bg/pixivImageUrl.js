@@ -173,9 +173,26 @@ var pixiv = (function () {
     }
     var exported = {
         getImageUrl: getImageUrl,
-        api: api,
         start: start
     }
+    Object.defineProperties(exported, {
+        '_api': { writable: true, value: api },
+        'api': {
+            enumerable: true,
+            get: function () {
+                return this._api
+            },
+            set: function (value) {
+                if (!_deepCompare(this._api, value, /(^chance$)|(^user_id$)/)) {
+                    imageList.splice(0, imageList.length)
+                    console.log('reload pixiv images');
+                    loadImageList()
+                }
+                this._api = value
+            }
+        }
+    })
+
     function getImageUrl() {
         var url;
         while (!url && imageList.length > 0) {

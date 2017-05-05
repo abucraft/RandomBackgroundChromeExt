@@ -78,3 +78,61 @@ function _copyJSON(dest, src) {
         }
     })
 }
+
+function _shrinkAndSortByRepeat(array) {
+    var doc = {};
+    array.forEach(function (item) {
+        if (!doc[item.url]) {
+            var cpitem = {};
+            _copyJSON(cpitem, item);
+            doc[item.url] = cpitem;
+            doc[item.url].count = 1;
+        } else {
+            doc[item.url].count++;
+        }
+    });
+    var urlkeys = Object.keys(doc);
+    var bufferArray = [];
+    urlkeys.forEach(function (key) {
+        bufferArray.push(doc[key]);
+    });
+    bufferArray.sort(function (a, b) {
+        return b.count - a.count;
+    });
+    return bufferArray;
+}
+
+Object.defineProperty(Array.prototype, 'unique', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: function () {
+        var a = this.concat();
+        for (var i = 0; i < a.length; ++i) {
+            for (var j = i + 1; j < a.length; ++j) {
+                if (a[i] === a[j])
+                    a.splice(j--, 1);
+            }
+        }
+
+        return a;
+    }
+});
+
+function _deepCompare(obj1, obj2, ignore) {
+    if (typeof obj1 !== 'object' || typeof obj2 !== 'object') {
+        return obj1 === obj2;
+    }
+    var keys1 = Object.keys(obj1);
+    var keys2 = Object.keys(obj2);
+    var allkeys = keys1.concat(keys2).unique();
+    for (let i in allkeys) {
+        if (ignore && ignore.test(allkeys[i])) {
+            continue
+        }
+        if (!_deepCompare(obj1[allkeys[i]], obj2[allkeys[i]], ignore)) {
+            return false
+        }
+    }
+    return true
+}

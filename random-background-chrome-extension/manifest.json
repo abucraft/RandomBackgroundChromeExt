@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "__MSG_appName__",
     "description": "__MSG_appDesc__",
-    "version": "0.7",
+    "version": "0.8",
     "default_locale": "zh_CN",
     "icons": {
         "128": "icon.png"
@@ -45,6 +45,7 @@
         "scripts": [
             "lib/utils.js",
             "lib/jquery-3.2.0.min.js",
+            "bg/log.js",
             "bg/imageUrlLoader.js",
             "bg/bingImageUrl.js",
             "bg/artstationImageUrl.js",

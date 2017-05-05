@@ -1,10 +1,10 @@
 var googleHomeReg = /https?:\/\/www\.google\.\w{2,3}(\.\w{1,3})?\//
-var searchingReg = /(o?q=)|(\/doodles)/;
+var searchingReg = /(o?q=)|(\/doodles)|(patents)/;
 chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     if (!tab.url.match(googleHomeReg) || tab.url.match(searchingReg)) { return; } // Not google
     if (changeInfo.status !== 'complete') { return; }
     console.log(rootSetting.settings);
-    if (!rootSetting.settings._applyOnGoogle) { return; }
+    if (!rootSetting.settings.applyOnGoogle) { return; }
     var scripts = [
         "lib/jquery-3.2.0.min.js",
         "lib/vue.min.js",

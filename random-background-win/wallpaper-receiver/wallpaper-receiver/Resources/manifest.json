@@ -1,0 +1,9 @@
+{
+  "name": "com.lisheng.wallpaper_receiver",
+  "description": "Windows wall paper setter",
+  "path": "wallpaper-receiver.exe",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://ngiopeekhnhggdfnngdhkcnojcmgfdde/"
+  ]
+}

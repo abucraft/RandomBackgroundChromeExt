@@ -19,7 +19,7 @@ namespace wallpaper_receiver
             images = new string[IMAGE_BUFFER];
             for(int i = 0; i < IMAGE_BUFFER; i++)
             {
-                images[i] = Path.GetFullPath("wallpaper" + i + ".png");
+                images[i] = Path.Combine(Path.GetTempPath(), "wallpaper" + i + ".png");
             }
             try
             {
@@ -47,7 +47,8 @@ namespace wallpaper_receiver
             if (json["data"] != null||json["url"]!=null)
             {
                 var tick = json["tick"].Value<int>();
-                string tempPath = "wallpaper" + tick % IMAGE_BUFFER + ".png";
+                string tempFile = "wallpaper" + tick % IMAGE_BUFFER + ".png";
+                string tempPath = Path.Combine(Path.GetTempPath(), tempFile);
                 var imageIncrease = !File.Exists(tempPath);
                 if (json["data"] != null)
                 {
@@ -59,8 +60,7 @@ namespace wallpaper_receiver
                 }
                 path = tempPath;
                 var wallpaper = (IDesktopWallpaper)(new DesktopWallpaperClass());
-                IShellItemArray itemarr = WinAPI.getImageItemsFromPath(images);
-                SetSlidesIfNeeded(wallpaper, itemarr, imageIncrease);
+                SetSlidesIfNeeded(wallpaper, imageIncrease);
                 wallpaper.AdvanceSlideshow(null, DesktopSlideshowDirection.Forward);
             }
             var result = new JObject();
@@ -68,16 +68,21 @@ namespace wallpaper_receiver
             return result;
         }
 
-        public static void SetSlidesIfNeeded(IDesktopWallpaper wallpaper, IShellItemArray slides, bool allways)
+        public static void SetSlidesIfNeeded(IDesktopWallpaper wallpaper,  bool allways)
         {
             string pname = "";
+            IShellItemArray slides = WinAPI.getImageItemsFromPath(images);
             IShellItemArray currentSlides;
             wallpaper.GetSlideshow(out currentSlides);
             IShellItem item, parent;
             currentSlides.GetItemAt(0, out item);
-            item.GetParent(out parent);
-            parent.GetDisplayName(ShellNativeMethods.ShellItemDesignNameOptions.FileSystemPath, out pname);
-            string curpname = Path.GetFullPath(".");
+            if (item != null) {
+                item.GetParent(out parent);
+                parent.GetDisplayName(ShellNativeMethods.ShellItemDesignNameOptions.FileSystemPath, out pname);
+            }
+            string curpname = Path.GetTempPath();
+            curpname= curpname.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            pname = pname.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
             if (curpname != pname || allways)
             {
                 wallpaper.SetSlideshow(slides);

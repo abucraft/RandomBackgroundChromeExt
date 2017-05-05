@@ -1,23 +1,75 @@
 var MAX_CACHE = 5;
 var MAX_RECURSIVE = 20;
 var CACHE_TIMEOUT = 15000;
-var sources = [bing, artstation, pixiv, custom];
-var rootSetting = {
-    sources: sources,
-    settings: {
-        _wallpaperUpdateTime: 60 * 1000,
-        _applyOnDesktopWallpaper: true,
-        _applyOnGoogle: true
-    }
-}
+
 var tick = 0;
 var wallpaperTimer = null;
 var datas = [];
 var urls = [];
 var cache_urls = [];
+//LOG_ENABLE = true;
+var sources = [bing, artstation, pixiv, custom];
+var rootSetting = {
+    sources: sources,
+    settings: {}
+}
+Object.defineProperties(rootSetting.settings, {
+    'version': { value: 0.8 },
+    '_wallpaperUpdateTime': { writable: true, value: 60 * 1000 },
+    'wallpaperUpdateTime': {
+        enumerable: true,
+        get: function () {
+            return this._wallpaperUpdateTime
+        },
+        set: function (value) {
+            if (this._wallpaperUpdateTime === value) {
+                return
+            }
+            this._wallpaperUpdateTime = value
+            if (wallpaperTimer) {
+                clearTimeout(wallpaperTimer)
+            }
+            wallpaperTimer = setTimeout(sendWallpaper, this._wallpaperUpdateTime);
+        }
+    },
+    '_applyOnDesktopWallpaper': { writable: true, value: true },
+    'applyOnDesktopWallpaper': {
+        enumerable: true,
+        get: function () {
+            return this._applyOnDesktopWallpaper
+        },
+        set: function (value) {
+            this._applyOnDesktopWallpaper = value
+        }
+    },
+    '_applyOnGoogle': { writable: true, value: true },
+    'applyOnGoogle': {
+        enumerable: true,
+        get: function () {
+            return this._applyOnGoogle
+        },
+        set: function (value) {
+            this._applyOnGoogle = value
+        }
+    }
+})
 
 start();
 storeData(0);
+
+function convertOldSettings(oldSetting) {
+    if (oldSetting.version === rootSetting.settings.version) {
+        return oldSetting;
+    }
+    var keys = Object.keys(oldSetting);
+    var newSetting = {};
+    for (var i in keys) {
+        var key = keys[i];
+        var newKey = key.replace('_', '');
+        newSetting[newKey] = oldSetting[key];
+    }
+    return newSetting;
+}
 
 function start() {
     var promises = [];
@@ -32,24 +84,30 @@ function start() {
     }
     var settings = localStorage.getItem('settings');
     if (settings) {
-        _copyJSON(rootSetting.settings, JSON.parse(settings));
+        _copyJSON(rootSetting.settings, convertOldSettings(JSON.parse(settings)));
     }
     // Begin to send wallpaper to desktop after prepared
     Promise.all(promises).then(function () {
-        wallpaperTimer = setTimeout(sendWallpaper, rootSetting.settings._wallpaperUpdateTime);
+        if (!wallpaperTimer) {
+            wallpaperTimer = setTimeout(sendWallpaper, rootSetting.settings._wallpaperUpdateTime);
+        }
     })
 }
 
 function applySetting(setting) {
+    var same = true;
     for (var i = 0; i < sources.length; i++) {
+        same = same && _deepCompare(sources[i].api, setting.sources[i]);
         sources[i].api = setting.sources[i];
         _setLocalStorage(sources[i].api.name, sources[i].api);
     }
-    if (rootSetting.settings._wallpaperUpdateTime !== setting.settings._wallpaperUpdateTime) {
-        clearTimeout(wallpaperTimer);
-        wallpaperTimer = setTimeout(sendWallpaper, setting.settings._wallpaperUpdateTime);
+    // clear cache and reload if sources changed
+    if (!same) {
+        datas.splice(0, datas.length)
+        urls.splice(0, urls.length)
+        storeData(0);
     }
-    rootSetting.settings = setting.settings;
+    _copyJSON(rootSetting.settings, setting.settings);
     _setLocalStorage("settings", rootSetting.settings);
 }
 
@@ -84,18 +142,21 @@ function getData() {
 
 function pickData() {
     storeData(0);
+    var url;
     if (datas.length > 0 && urls.length > 0) {
         var fromUrl = parseInt(Math.random() * 2);
         if (fromUrl) {
-            return urls.shift();
+            url = urls.shift();
         } else {
-            return datas.shift();
+            url = datas.shift();
         }
     } else if (datas.length > 0) {
-        return datas.shift();
+        url = datas.shift();
     } else if (urls.length > 0) {
-        return urls.shift();
+        url = urls.shift();
     }
+    logUrl(url);
+    return url;
 }
 
 function storeData(roop = 0) {
@@ -106,7 +167,12 @@ function storeData(roop = 0) {
     if (datas.length + urls.length > MAX_CACHE) {
         return Promise.resolve();
     } else {
-        promise = randomChooseSource().getImageUrl();
+        var rsrc = randomChooseSource();
+        if (!rsrc) {
+            return Promise.resolve();
+        } else {
+            promise = rsrc.getImageUrl();
+        }
     }
     //add cache 
     promise = promise.then(function (url) {
@@ -148,70 +214,58 @@ function storeData(roop = 0) {
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request.type === 'QUERY') {
-        getData().then(function (data) {
-            console.log(`send ${data.url}`);
-            sendResponse(data)
-        });
-        return true;
+    switch (request.type) {
+        case 'QUERY':
+            getData().then(function (data) {
+                console.log(`send ${data.url}`);
+                sendResponse(data)
+            });
+            return true;
+        case "CACHE_REQUEST":
+            var url = urls.shift();
+            if (url) {
+                sendResponse(url);
+                cache_urls.push(url);
+                setTimeout(function () {
+                    for (var i = 0; i < cache_urls.length; i++) {
+                        if (cache_urls[i].url === url.url)
+                            break;
+                    }
+                    if (i < cache_urls.length) {
+                        cache_urls.splice(i, 1);
+                        urls.push(url);
+                    }
+                }, CACHE_TIMEOUT);
+            }
+            break
+        case "CACHE_RESULT":
+            var data = request.data;
+            for (var i = 0; i < cache_urls.length; i++) {
+                if (cache_urls[i].url === data.url)
+                    break;
+            }
+            if (i < cache_urls.length) {
+                cache_urls.splice(i, 1);
+                datas.push(data);
+            }
+            break
+        case 'QUERY_SETTINGS':
+            var setting = {};
+            setting.sources = [];
+            setting.settings = rootSetting.settings;
+            for (var i = 0; i < sources.length; i++) {
+                setting.sources.push(sources[i].api);
+            }
+            sendResponse(setting);
+            return true
+        case 'APPLY_SETTINGS':
+            applySetting(request.data);
+            break
     }
 })
-
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request.type === "CACHE_REQUEST") {
-        var url = urls.shift();
-        if (url) {
-            sendResponse(url);
-            cache_urls.push(url);
-            setTimeout(function () {
-                for (var i = 0; i < cache_urls.length; i++) {
-                    if (cache_urls[i].url === url.url)
-                        break;
-                }
-                if (i < cache_urls.length) {
-                    cache_urls.splice(i, 1);
-                    urls.push(url);
-                }
-            }, CACHE_TIMEOUT);
-        }
-    }
-});
-
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request.type === "CACHE_RESULT") {
-        var data = request.data;
-        for (var i = 0; i < cache_urls.length; i++) {
-            if (cache_urls[i].url === data.url)
-                break;
-        }
-        if (i < cache_urls.length) {
-            cache_urls.splice(i, 1);
-            datas.push(data);
-        }
-    }
-});
-
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request.type === 'QUERY_SETTINGS') {
-        var setting = {};
-        setting.sources = [];
-        setting.settings = rootSetting.settings;
-        for (var i = 0; i < sources.length; i++) {
-            setting.sources.push(sources[i].api);
-        }
-        sendResponse(setting);
-        return true;
-    }
-})
-
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-    if (request.type === 'APPLY_SETTINGS') {
-        applySetting(request.data);
-    }
-});
 
 function sendWallpaper() {
-    if (rootSetting.settings._applyOnDesktopWallpaper) {
+    if (rootSetting.settings.applyOnDesktopWallpaper) {
         var wallpaper = pickData();
         if (wallpaper) {
             wallpaper.tick = tick;
