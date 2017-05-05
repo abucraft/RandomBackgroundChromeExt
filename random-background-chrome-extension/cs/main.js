@@ -36,7 +36,8 @@ vm.strings = {
     apply_on_google_zh: '应用于谷歌首页',
     apply_on_desktop_wallpaper: 'apply on desktop wallpaper',
     apply_on_desktop_wallpaper_zh: '应用于桌面背景',
-
+    run_in_background:'run in background',
+    run_in_background_zh:'后台运行'
 }
 vm.items = [];
 vm.settings = { applyOnGoogle: true, applyOnDesktopWallpaper: true, wallpaperUpdateTime: MINUTE }

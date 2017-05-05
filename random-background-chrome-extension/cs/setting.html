@@ -108,6 +108,13 @@
                 </div>
             </div>
         </div>
+        <div class="item">
+            <div class="place-holder"></div>
+            <label class="mdl-checkbox mdl-js-checkbox" for="runInBackground" v-mdl>
+                    <input id="runInBackground" type="checkbox" class="mdl-checkbox__input" v-mdl-check-refresh="{value:settings.runInBackground}" v-model="settings.runInBackground"/>
+                    <span class="mdl-checkbox__label">{{getString(strings,'run_in_background')}}</span>
+            </label>
+        </div>
         <div class="item" />
         <div class="item right">
             <div class="inline-block" style="width: 220px;" />

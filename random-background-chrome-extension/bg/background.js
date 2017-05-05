@@ -51,6 +51,42 @@ Object.defineProperties(rootSetting.settings, {
         set: function (value) {
             this._applyOnGoogle = value
         }
+    },
+    '_runInBackground': { writable: true, value: false },
+    'runInBackground': {
+        enumerable: true,
+        get: function () {
+            return this._runInBackground
+        },
+        set: function (value) {
+            var vm = this;
+            if (value === vm._runInBackground) {
+                return
+            }
+            if (value) {
+                chrome.permissions.request({
+                    permissions: ['background']
+                }, function (granted) {
+                    if (granted) {
+                        vm._runInBackground = true
+                    } else {
+                        vm._runInBackground = false
+                    }
+                })
+            } else {
+                chrome.permissions.remove({
+                    permissions: ['background']
+                }, function (removed) {
+                    if (removed) {
+                        vm._runInBackground = false
+                    } else {
+                        // The permissions have not been removed (e.g., you tried to remove
+                        // required permissions).
+                        vm._runInBackground = true
+                    }
+                });
+            }
+        }
     }
 })
 
