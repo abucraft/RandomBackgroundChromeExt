@@ -14,7 +14,7 @@ var rootSetting = {
     settings: {}
 }
 Object.defineProperties(rootSetting.settings, {
-    'version': { value: 0.8 },
+    'version': { value: 0.9 },
     '_wallpaperUpdateTime': { writable: true, value: 60 * 1000 },
     'wallpaperUpdateTime': {
         enumerable: true,
@@ -63,29 +63,35 @@ Object.defineProperties(rootSetting.settings, {
             if (value === vm._runInBackground) {
                 return
             }
-            if (value) {
-                chrome.permissions.request({
-                    permissions: ['background']
-                }, function (granted) {
-                    if (granted) {
-                        vm._runInBackground = true
-                    } else {
-                        vm._runInBackground = false
-                    }
-                })
-            } else {
-                chrome.permissions.remove({
-                    permissions: ['background']
-                }, function (removed) {
-                    if (removed) {
-                        vm._runInBackground = false
-                    } else {
-                        // The permissions have not been removed (e.g., you tried to remove
-                        // required permissions).
-                        vm._runInBackground = true
-                    }
-                });
-            }
+            vm._runInBackground = value
+            chrome.permissions.contains({
+                permissions: ['background']
+            }, function (contains) {
+                // If not has permission and we want it, request it
+                if (!contains && value) {
+                    chrome.permissions.request({
+                        permissions: ['background']
+                    }, function (granted) {
+                        if (!granted) {
+                            vm._runInBackground = false
+                            _setLocalStorage("settings", rootSetting.settings)
+                        }
+                    })
+                }
+                // If has permission and we don't want it, remove it
+                if (contains && !value) {
+                    chrome.permissions.remove({
+                        permissions: ['background']
+                    }, function (removed) {
+                        if (!removed) {
+                            // The permissions have not been removed (e.g., you tried to remove
+                            // required permissions).
+                            vm._runInBackground = true
+                            _setLocalStorage("settings", rootSetting.settings)
+                        }
+                    });
+                }
+            })
         }
     }
 })
