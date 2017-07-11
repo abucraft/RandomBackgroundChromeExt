@@ -7,12 +7,15 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function (details) {
             if (details.url.indexOf('pximg.net') >= 0) {
                 details.requestHeaders[i].value = "https://pximg.net/"
             }
+            if (details.url.indexOf("500px.com")>=0){
+                details.requestHeaders[i].value = "https://500px.com/"
+            }
         }
     }
     return { requestHeaders: details.requestHeaders };
 },
     {
-        urls: ["*://*.pixiv.net/*", "*://*.pximg.net/*"]
+        urls: ["*://*.pixiv.net/*", "*://*.pximg.net/*", "*://*.500px.com/*"]
     },
     ["blocking", "requestHeaders"]
 );

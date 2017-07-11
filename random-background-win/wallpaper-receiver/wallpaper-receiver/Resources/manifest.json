@@ -4,6 +4,7 @@
   "path": "wallpaper-receiver.exe",
   "type": "stdio",
   "allowed_origins": [
-    "chrome-extension://ngiopeekhnhggdfnngdhkcnojcmgfdde/"
+    "chrome-extension://ngiopeekhnhggdfnngdhkcnojcmgfdde/",
+    "chrome-extension://gbikeliglehfocdcmohamnnjhepmldem/"
   ]
 }

@@ -82,13 +82,25 @@ var imageUrlLoader = (function () {
         }
     }
     function fillUrl(rule, obj) {
-        var baseUrl = rule.url;
+        let baseUrl = rule.url;
+        if (rule.postfix) {
+            let postdef = rule.postfix;
+            let source = postdef.source;
+            let sourceObj, value;
+            if (source === 'json') {
+                sourceObj = obj;
+            }
+            value = getValFromPath(sourceObj, postdef.path);
+            if (value !== undefined) {
+                baseUrl = baseUrl + value;//concat baseUrl with postfix value
+            }
+        }
         if (rule.params) {
-            for (var i = 0; i < rule.params.length; i++) {
-                var paramdef = rule.params[i];
-                var source = paramdef.localParam.source;
-                var sourceObj = null;
-                var value = null;
+            for (let i = 0; i < rule.params.length; i++) {
+                let paramdef = rule.params[i];
+                let source = paramdef.localParam.source;
+                let sourceObj = null;
+                let value = null;
                 if (source === 'localStorage') {
                     sourceObj = localStorage;
                 }
