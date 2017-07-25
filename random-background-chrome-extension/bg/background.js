@@ -14,7 +14,7 @@ var rootSetting = {
     settings: {}
 }
 Object.defineProperties(rootSetting.settings, {
-    'version': { value: 0.9 },
+    'version': { value: 1.1 },
     '_wallpaperUpdateTime': { writable: true, value: 60 * 1000 },
     'wallpaperUpdateTime': {
         enumerable: true,
@@ -105,7 +105,7 @@ function convertOldSettings(oldSetting) {
     }
     var keys = Object.keys(oldSetting);
     var newSetting = {};
-    for (var i in keys) {
+    for (let i in keys) {
         var key = keys[i];
         var newKey = key.replace('_', '');
         newSetting[newKey] = oldSetting[key];
@@ -118,7 +118,11 @@ function start() {
     for (var i = 0; i < sources.length; i++) {
         var storedRule = localStorage.getItem(sources[i].api.name);
         if (storedRule) {
-            sources[i].api = JSON.parse(storedRule);
+            oldApi = JSON.parse(storedRule);
+            let version = sources[i].api.version;
+            if (!(version && (!oldApi.version || version > oldApi.version))){
+                sources[i].api = JSON.parse(storedRule);
+            }
         }
         if (sources[i].start) {
             promises.push(sources[i].start());

@@ -21,20 +21,33 @@ var imageUrlLoader = (function () {
 
     function getAllItems(item, rule) {
         if (rule.type === 'info_json') {
-            var url = fillUrl(rule, item);
-            var list = [];
-            var itemPromise = getItemsList(rule, url, list);
+            let url = fillUrl(rule, item);
+            let list = [];
+            let itemPromise = getItemsList(rule, url, list);
             function afterPromise() {
-                var finalList = _randomPick(list, rule.restrict);
+                let finalList = _randomPick(list, rule.restrict);
                 return finalList;
             }
             itemPromise = itemPromise.then(afterPromise, afterPromise);
             return itemPromise;
         } else if (rule.type === "image_json") {
-            var srcLink = item.getLink;
+            let srcLink = item.getLink;
             srcLink = srcLink ? srcLink : getLink(rule, item);
             //console.warn(srcLink);
             return Promise.resolve({ url: getValFromPath(item, rule.imageUrlPath), link: srcLink });
+        } else if (rule.type === "info_html") {
+            let url = fillUrlHtml(rule, item);
+            let list = [];
+            let itemPromise = getItemsListHtml(rule, url, list);
+            function afterPromise() {
+                let finalList = _randomPick(list, rule.restrict);
+                return finalList;
+            }
+            itemPromise = itemPromise.then(afterPromise, afterPromise);
+            return itemPromise;
+        } else if (rule.type === "image_html") {
+            let srcLink = getLinkHtml(rule, item);
+            return Promise.resolve({ url: $(item).attr(rule.imageUrlAttr), link: srcLink });
         } else {
             return Promise.resolve([]);
         }
@@ -63,8 +76,12 @@ var imageUrlLoader = (function () {
                     var link = getLink(rule, data);
                     var item = getValFromPath(data, rule.item.path);
                     if (item.length) {
+                        for (let i = 0; i < item.length; i++) {
+                            item[i].url = url;
+                        }
                         list.push.apply(list, item);
                     } else {
+                        item.url = url;
                         list.push(item);
                     }
                     // if link is in parent, then bind link to all the children
@@ -81,8 +98,53 @@ var imageUrlLoader = (function () {
             return Promise.resolve(list);
         }
     }
+
+    function getItemsListHtml(rule, url, list) {
+        if (url) {
+            if (url instanceof Array) {
+                let promises = [];
+                for (let i = 0; i < url.length; i++) {
+                    promises.push(getItemsListHtml(rule, url[i], list))
+                }
+                return Promise.all(promises);
+            } else {
+                return new Promise(function (resolve, reject) {
+                    $.get(url, function (data) {
+                        data = data.replace(/\ssrc=/g, ' custom-src=');
+                        data = $(data);
+                        var link = getLinkHtml(rule, data);
+                        var item = getValFromPathHtml(data, rule.item.path, rule.item.filter);
+                        if (item.length) {
+                            for (let i = 0; i < item.length; i++) {
+                                item[i].url = url;
+                            }
+                            list.push.apply(list, item);
+                        } else {
+                            item.url = url;
+                            list.push(item);
+                        }
+                        // if link is in parent, then bind link to all the children
+                        list.forEach(function (it) { it.getLink = link })
+                        let nextUrl;
+                        if (rule.nextUrl) {
+                            nextUrl = fillUrlHtml(rule.nextUrl, data);
+                        }
+                        if (nextUrl) {
+                            getItemsListHtml(rule, nextUrl, list).then(function () { resolve(list) });
+                        } else {
+                            resolve(list);
+                        }
+                    }, 'text').fail(function () { resolve(list) });
+                })
+            }
+        } else {
+            return Promise.resolve(list);
+        }
+    }
     function fillUrl(rule, obj) {
         let baseUrl = rule.url;
+        if (baseUrl === '.')
+            baseUrl = curUrl;
         if (rule.postfix) {
             let postdef = rule.postfix;
             let source = postdef.source;
@@ -118,6 +180,42 @@ var imageUrlLoader = (function () {
         return baseUrl;
     }
 
+    function fillUrlHtml(rule, obj) {
+        let baseUrl = rule.url;
+        if (baseUrl === '.')
+            baseUrl = obj.url;
+        if (rule.postfix) {
+            let postdef = rule.postfix;
+            let postobj;
+            if (postdef.path) {
+                postobj = getValFromPathHtml(obj, postdef.path);
+            }
+            if ($(postobj).attr(postdef.attr)) {
+                baseUrl += $(postobj).attr(postdef.attr);
+            } else {
+                //error when handle url, ignore it because it maybe nextUrl
+                return;
+            }
+        }
+        if (rule.params) {
+            for (let i = 0; i < rule.params.length; i++) {
+                let paramdef = rule.params[i];
+                let source = paramdef.localParam.source;
+                let sourceObj = null;
+                let value = null;
+                if (source === 'html') {
+                    sourceObj = $(obj);
+                    if (paramdef.localParam.path) {
+                        sourceObj = getValFromPathHtml(sourceObj, paramdef.localParam.path);
+                    }
+                    value = $(sourceObj).attr(paramdef.localParam.attr);
+                }
+                if (value !== undefined)
+                    baseUrl = setUrlParam(baseUrl, paramdef.urlParam, value);
+            }
+        }
+        return baseUrl;
+    }
     // get reference link
     function getLink(rule, obj) {
         var link = rule.link;
@@ -127,7 +225,6 @@ var imageUrlLoader = (function () {
             }
             if (typeof link === 'object') {
                 if (link.url) {
-
                     return fillUrl(link, obj);
                 }
                 if (link.path) {
@@ -136,6 +233,20 @@ var imageUrlLoader = (function () {
             }
         }
         return null;
+    }
+
+    function getLinkHtml(rule, obj) {
+        var link = rule.link;
+        if (link) {
+            if (typeof link === 'string') {
+                return link;
+            }
+            if (typeof link === 'object') {
+                if (link.url) {
+                    return fillUrlHtml(link, obj);
+                }
+            }
+        }
     }
 
     function setUrlParam(url, paramName, value) {
@@ -172,6 +283,44 @@ var imageUrlLoader = (function () {
                 }
                 else {
                     currentObj = currentObj[pathArray[i]];
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            currentObj = undefined;
+        }
+        return currentObj;
+    }
+
+    function getValFromPathHtml(obj, propertyPath, filter) {
+        if (!obj || !propertyPath) {
+            return;
+        }
+        var currentObj = undefined;
+        try {
+            if (obj === localStorage) {
+                var pathArray = propertyPath.split('/');
+                var key = pathArray.shift();
+                obj = localStorage.getItem(key);
+                if (pathArray.length > 0) {
+                    obj = JSON.parse(obj);
+                }
+                currentObj = obj;
+                for (var i = 0; i < pathArray.length; i++) {
+                    if (pathArray[i] === '' || pathArray[i] === "*") {
+                        currentObj = currentObj;
+                    } else if (pathArray[i] === '[random]') {
+                        var length = currentObj.length;
+                        currentObj = currentObj[parseInt(Math.random() * length)];
+                    }
+                    else {
+                        currentObj = currentObj[pathArray[i]];
+                    }
+                }
+            } else {
+                currentObj = obj.find(propertyPath);
+                if (filter) {
+                    currentObj = currentObj.filter(filter);
                 }
             }
         } catch (err) {

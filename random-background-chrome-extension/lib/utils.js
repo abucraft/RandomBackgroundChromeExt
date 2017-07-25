@@ -29,6 +29,9 @@ function _shuffle(array) {
 
 function _randomPick(list, limit) {
     var nList = [];
+    if(!limit){
+        limit=list.length;
+    }
     for (var i = 0; i < limit; i++) {
         if (list.length === 0) {
             break;

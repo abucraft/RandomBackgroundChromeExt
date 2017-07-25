@@ -5,162 +5,167 @@ var pixiv = (function () {
     var api = {
         apis: [
             {
-                type: "info_json",
-                url: "https://app-api.pixiv.net/v1/user/following?restrict=public",
-                params: [{
-                    urlParam: "user_id",
-                    localParam: {
-                        source: "rule",
-                        path: "user_id"
-                    }
-                }],
+                type: "info_html",
+                url: ["https://www.pixiv.net/bookmark_new_illust.php?",
+                    "https://www.pixiv.net/bookmark_new_illust.php?p=2"],
                 item: {
-                    type: "info_json",
-                    path: "/user_previews/*",
-                    url: "https://app-api.pixiv.net/v1/user/illusts?type=illust",
+                    type: "info_html",
+                    path: ".image-item a.work",
+                    filter: function () { return $('.page-count', this).length === 0; },
+                    url: "https://www.pixiv.net/member_illust.php?mode=medium",
                     params: [{
-                        urlParam: "user_id",
+                        urlParam: "illust_id",
                         localParam: {
-                            source: "json",
-                            path: "/user/id"
+                            source: 'html',
+                            path: 'img',
+                            attr: 'data-id'
                         }
                     }],
                     item: {
-                        type: "image_json",
-                        path: "/illusts/*",
-                        imageUrlPath: "/meta_single_page/original_image_url",
+                        type: "image_html",
+                        path: "._illust_modal img",
+                        imageUrlAttr: "data-src",
                         link: {
-                            url: "http://www.pixiv.net/member_illust.php?mode=medium",
-                            params: [
-                                {
-                                    urlParam: "illust_id",
-                                    localParam: {
-                                        source: "json",
-                                        path: "/id",
-                                    }
-                                }
-                            ]
+                            url: "."
                         }
                     },
-                    restrict: 5,
-                    nextUrl: "/next_url"
+                    restrict: 1,
                 },
-                restrict: 10,
-                nextUrl: "/next_url",
+                restrict: 100,
                 enabled: true,
                 show: true,
                 name: "following users illusts",
-                name_zh: "关注用户作品"
+                name_zh: "关注用户新作"
             },
             {
-                type: "info_json",
-                url: "https://app-api.pixiv.net/v1/illust/ranking?mode=day&content=illust",
+                type: "info_html",
+                url: "https://www.pixiv.net/ranking.php?mode=daily",
                 item: {
-                    type: "image_json",
-                    path: "/illusts/*",
-                    imageUrlPath: "/meta_single_page/original_image_url",
-                    link: {
-                        url: "http://www.pixiv.net/member_illust.php?mode=medium",
-                        params: [
-                            {
-                                urlParam: "illust_id",
-                                localParam: {
-                                    source: "json",
-                                    path: "/id",
-                                }
-                            }
-                        ]
-                    }
+                    type: "info_html",
+                    path: "section.ranking-item",
+                    filter: function () { return $('.page-count', this).length === 0; },
+                    url: "https://www.pixiv.net/member_illust.php?mode=medium",
+                    params: [{
+                        urlParam: "illust_id",
+                        localParam: {
+                            source: 'html',
+                            attr: 'data-id'
+                        }
+                    }],
+                    item: {
+                        type: "image_html",
+                        path: "._illust_modal img",
+                        imageUrlAttr: "data-src",
+                        link: {
+                            url: "."
+                        }
+                    },
+                    restrict: 1,
                 },
-                restrict: 30,
+                restrict: 50,
                 enabled: true,
                 name: "illust ranking daily",
                 name_zh: "每日插画排行榜",
                 show: true,
             },
             {
-                type: "info_json",
-                url: "https://app-api.pixiv.net/v1/illust/ranking?mode=week&content=illust",
+                type: "info_html",
+                url: "https://www.pixiv.net/ranking.php?mode=weekly",
                 item: {
-                    type: "image_json",
-                    path: "/illusts/*",
-                    imageUrlPath: "/meta_single_page/original_image_url",
-                    link: {
-                        url: "http://www.pixiv.net/member_illust.php?mode=medium",
-                        params: [
-                            {
-                                urlParam: "illust_id",
-                                localParam: {
-                                    source: "json",
-                                    path: "/id",
-                                }
-                            }
-                        ]
-                    }
+                    type: "info_html",
+                    path: "section.ranking-item",
+                    filter: function () { return $('.page-count', this).length === 0; },
+                    url: "https://www.pixiv.net/member_illust.php?mode=medium",
+                    params: [{
+                        urlParam: "illust_id",
+                        localParam: {
+                            source: 'html',
+                            attr: 'data-id'
+                        }
+                    }],
+                    item: {
+                        type: "image_html",
+                        path: "._illust_modal img",
+                        imageUrlAttr: "data-src",
+                        link: {
+                            url: "."
+                        }
+                    },
+                    restrict: 1,
                 },
-                restrict: 30,
+                restrict: 50,
                 name: "illust ranking weekly",
                 name_zh: "每周插画排行榜",
                 enabled: true,
                 show: true,
             },
             {
-                type: "info_json",
-                url: "https://app-api.pixiv.net/v1/illust/ranking?mode=month&content=illust",
+                type: "info_html",
+                url: "https://www.pixiv.net/ranking.php?mode=monthly",
                 item: {
-                    type: "image_json",
-                    path: "/illusts/*",
-                    imageUrlPath: "/meta_single_page/original_image_url",
-                    link: {
-                        url: "http://www.pixiv.net/member_illust.php?mode=medium",
-                        params: [
-                            {
-                                urlParam: "illust_id",
-                                localParam: {
-                                    source: "json",
-                                    path: "/id",
-                                }
-                            }
-                        ]
-                    }
+                    type: "info_html",
+                    path: "section.ranking-item",
+                    filter: function () { return $('.page-count', this).length === 0; },
+                    url: "https://www.pixiv.net/member_illust.php?mode=medium",
+                    params: [{
+                        urlParam: "illust_id",
+                        localParam: {
+                            source: 'html',
+                            attr: 'data-id'
+                        }
+                    }],
+                    item: {
+                        type: "image_html",
+                        path: "._illust_modal img",
+                        imageUrlAttr: "data-src",
+                        link: {
+                            url: "."
+                        }
+                    },
+                    restrict: 1,
                 },
-                restrict: 30,
+                restrict: 50,
                 name: "illust ranking monthly",
                 name_zh: "每月插画排行榜",
                 enabled: true,
                 show: true,
             },
             {
-                type: "info_json",
-                url: "https://app-api.pixiv.net/v1/user/bookmarks/illust?restrict=public",
-                params: [{
-                    urlParam: "user_id",
-                    localParam: {
-                        source: "rule",
-                        path: "user_id"
-                    }
-                }],
+                type: "info_html",
+                url: "https://www.pixiv.net/bookmark.php",
                 item: {
-                    type: "image_json",
-                    path: "/illusts/*",
-                    imageUrlPath: "/meta_single_page/original_image_url",
-                    link: {
-                        url: "http://www.pixiv.net/member_illust.php?mode=medium",
-                        params: [
-                            {
-                                urlParam: "illust_id",
-                                localParam: {
-                                    source: "json",
-                                    path: "/id",
-                                }
-                            }
-                        ]
+                    type: "info_html",
+                    path: ".image-item a.work",
+                    filter: function () { return $('.page-count', this).length === 0; },
+                    url: "https://www.pixiv.net/member_illust.php?mode=medium",
+                    params: [{
+                        urlParam: "illust_id",
+                        localParam: {
+                            source: 'html',
+                            path: 'img',
+                            attr: 'data-id'
+                        }
+                    }],
+                    item: {
+                        type: "image_html",
+                        path: "._illust_modal img",
+                        imageUrlAttr: "data-src",
+                        link: {
+                            url: "."
+                        }
+                    },
+                    restrict: 1,
+                },
+                nextUrl:{
+                    url:"https://www.pixiv.net/bookmark.php",
+                    postfix:{
+                        path: ".pager-container .next [rel='next']",
+                        attr: "href"
                     }
                 },
-                restrict: 50,
+                restrict: 40,
                 name: "bookmarks",
                 name_zh: "收藏",
-                nextUrl: "/next_url",
                 enabled: true,
                 show: true,
             }
@@ -169,7 +174,8 @@ var pixiv = (function () {
         favicon: "https://www.pixiv.net/favicon.ico",
         type: "other",
         maxImage: 600,
-        chance: 100
+        chance: 100,
+        version: "1.1"
     }
     var exported = {
         getImageUrl: getImageUrl,
@@ -207,33 +213,15 @@ var pixiv = (function () {
         }
     }
 
-    function getUserIdP() {
-        return new Promise(function (res, rej) {
-            $.get('https://www.pixiv.net/member.php', {}, function (r, s, req) {
-                if (req.status === 200) {
-                    var text = req.responseText;
-                    var index = text.indexOf('pixiv.user.id');
-                    var beginIdx = text.indexOf('"', index);
-                    var endIdx = text.indexOf('"', beginIdx + 1);
-                    var userId = text.substr(beginIdx + 1, endIdx - beginIdx - 1);
-                    exported.api['user_id'] = userId;
-                    res();
-                }
-            }).always(function () {
-                res();
-            });
-        });
-    }
     function loadImageList() {
         if (loading || imageList.length > exported.api.maxImage) {
             return Promise.resolve();
         }
         loading = true;
-        return getUserIdP().then(function () {
-            return imageUrlLoader.parseAndLoad(exported.api, imageList);
-        }).then(function () {
-            loading = false;
-        })
+        return imageUrlLoader.parseAndLoad(exported.api, imageList)
+            .then(function () {
+                loading = false;
+            })
     }
 
     function start() {
