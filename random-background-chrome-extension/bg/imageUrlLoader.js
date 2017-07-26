@@ -1,6 +1,7 @@
 // load all image urls using certain api structure
 var imageUrlLoader = (function () {
     var curRule = null;
+    var curUrlKey = "oiq3iri384jj";
     function parseAndLoad(structure, imageList) {
         curRule = structure;
         var apis = structure.apis;
@@ -77,11 +78,11 @@ var imageUrlLoader = (function () {
                     var item = getValFromPath(data, rule.item.path);
                     if (item.length) {
                         for (let i = 0; i < item.length; i++) {
-                            item[i].url = url;
+                            item[i][curUrlKey] = url;
                         }
                         list.push.apply(list, item);
                     } else {
-                        item.url = url;
+                        item[curUrlKey] = url;
                         list.push(item);
                     }
                     // if link is in parent, then bind link to all the children
@@ -116,11 +117,11 @@ var imageUrlLoader = (function () {
                         var item = getValFromPathHtml(data, rule.item.path, rule.item.filter);
                         if (item.length) {
                             for (let i = 0; i < item.length; i++) {
-                                item[i].url = url;
+                                item[i][curUrlKey] = url;
                             }
                             list.push.apply(list, item);
                         } else {
-                            item.url = url;
+                            item[curUrlKey] = url;
                             list.push(item);
                         }
                         // if link is in parent, then bind link to all the children
@@ -143,8 +144,6 @@ var imageUrlLoader = (function () {
     }
     function fillUrl(rule, obj) {
         let baseUrl = rule.url;
-        if (baseUrl === '.')
-            baseUrl = curUrl;
         if (rule.postfix) {
             let postdef = rule.postfix;
             let source = postdef.source;
@@ -183,7 +182,7 @@ var imageUrlLoader = (function () {
     function fillUrlHtml(rule, obj) {
         let baseUrl = rule.url;
         if (baseUrl === '.')
-            baseUrl = obj.url;
+            baseUrl = obj[curUrlKey];
         if (rule.postfix) {
             let postdef = rule.postfix;
             let postobj;
