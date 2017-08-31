@@ -67,10 +67,12 @@ var fiveHundred = (function () {
             set: function (value) {
                 if (!_deepCompare(this._api, value, /(^chance$)/)) {
                     imageList.splice(0, imageList.length)
+                    _copyJSON(this._api, value)
                     console.log('reload 500px images');
                     loadImageList()
+                } else {
+                    _copyJSON(this._api, value)
                 }
-                this._api = value
             }
         }
     })

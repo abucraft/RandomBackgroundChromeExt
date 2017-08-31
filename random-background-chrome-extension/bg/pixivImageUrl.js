@@ -156,9 +156,9 @@ var pixiv = (function () {
                     },
                     restrict: 1,
                 },
-                nextUrl:{
-                    url:"https://www.pixiv.net/bookmark.php",
-                    postfix:{
+                nextUrl: {
+                    url: "https://www.pixiv.net/bookmark.php",
+                    postfix: {
                         path: ".pager-container .next [rel='next']",
                         attr: "href"
                     }
@@ -189,12 +189,14 @@ var pixiv = (function () {
                 return this._api
             },
             set: function (value) {
-                if (!_deepCompare(this._api, value, /(^chance$)|(^user_id$)/)) {
+                if (!_deepCompare(this._api, value, /(^chance$)|(^user_id$)|(^filter$)/)) {
                     imageList.splice(0, imageList.length)
+                    _copyJSON(this._api, value)
                     console.log('reload pixiv images');
                     loadImageList()
+                } else {
+                    _copyJSON(this._api, value)
                 }
-                this._api = value
             }
         }
     })
