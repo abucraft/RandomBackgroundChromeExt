@@ -94,7 +94,7 @@ Object.defineProperties(rootSetting.settings, {
             })
         }
     },
-    '_emptyNewTab': { writable: true, value: true },
+    '_emptyNewTab': { writable: true, value: false },
     'emptyNewTab': {
         enumerable: true,
         get: function () {
@@ -240,6 +240,9 @@ function storeData(roop = 0) {
             var oReq = new XMLHttpRequest();
             oReq.open("GET", url.url, true);
             oReq.responseType = "arraybuffer";
+            if(url.url.indexOf('pximg')!=-1){
+                oReq.setRequestHeader('Referer',"https://pximg.net/")
+            }
 
             oReq.onload = function (oEvent) {
                 console.log(oReq.status);
