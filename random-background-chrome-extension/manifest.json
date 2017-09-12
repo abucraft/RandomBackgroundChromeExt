@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "__MSG_appName__",
     "description": "__MSG_appDesc__",
-    "version": "1.5",
+    "version": "1.6",
     "default_locale": "en",
     "icons": {
         "128": "icon.png"
@@ -15,32 +15,13 @@
         "webRequestBlocking",
         "webRequest",
         "tabs",
+        "contextMenus",
         "nativeMessaging"
     ],
     "optional_permissions": [
         "background"
     ],
-    "content_scripts": [
-        {
-            "matches": [
-                "*://*/_/chrome/newtab*"
-            ],
-            "js": [
-                "lib/jquery-3.2.0.min.js",
-                "lib/vue.min.js",
-                "lib/utils.js",
-                "lib/material.min.js",
-                "cs/cacheLoader.js",
-                "cs/main.js",
-                "cs/imageLoader.js"
-            ],
-            "css": [
-                "lib/material.min.css",
-                "lib/material-select.min.css",
-                "cs/main.css"
-            ]
-        }
-    ],
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "background": {
         "scripts": [
             "lib/utils.js",

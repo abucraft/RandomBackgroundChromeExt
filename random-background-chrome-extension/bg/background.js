@@ -93,7 +93,17 @@ Object.defineProperties(rootSetting.settings, {
                 }
             })
         }
-    }
+    },
+    '_emptyNewTab': { writable: true, value: true },
+    'emptyNewTab': {
+        enumerable: true,
+        get: function () {
+            return this._emptyNewTab
+        },
+        set: function (value) {
+            this._emptyNewTab = value
+        }
+    },
 })
 
 start();
@@ -120,7 +130,7 @@ function start() {
         if (storedRule) {
             oldApi = JSON.parse(storedRule);
             let version = sources[i].api.version;
-            if (!(version && (!oldApi.version || version > oldApi.version))){
+            if (!(version && (!oldApi.version || version > oldApi.version))) {
                 sources[i].api = JSON.parse(storedRule);
             }
         }
@@ -264,7 +274,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         case 'QUERY':
             getData().then(function (data) {
                 console.log(`send ${data.url}`);
-                sendResponse(data)
+                sendResponse(data);
             });
             return true;
         case "CACHE_REQUEST":

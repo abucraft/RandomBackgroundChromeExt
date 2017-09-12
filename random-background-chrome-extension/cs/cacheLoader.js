@@ -18,5 +18,13 @@ function loadCache() {
         }
     })
 }
+
+chrome.runtime.onMessage.addListener(
+    function (request, sender, sendResponse) {
+        if (request.type === "verify_injected") {
+            sendResponse({ message: "injected" });
+        }
+    });
+
 loadCache();
 setInterval(loadCache, CACHE_INTERVAL);

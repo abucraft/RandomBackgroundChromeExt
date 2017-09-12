@@ -139,3 +139,11 @@ function _deepCompare(obj1, obj2, ignore) {
     }
     return true
 }
+
+function _getString(store, key) {
+    var postfixed = key;
+    if (navigator.language.indexOf('zh') !== -1) {
+        postfixed = key + '_zh';
+    }
+    return store[postfixed] ? store[postfixed] : store[key];
+}
