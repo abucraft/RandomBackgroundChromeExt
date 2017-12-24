@@ -12,7 +12,9 @@ var custom = (function () {
         api: api
     }
     function getImageUrl() {
+        // _randomPick will splice array, push element back to it
         var url = _randomPick(exported.api.apis, 1).shift();
+        exported.api.apis.push(url);
         if (url) {
             return Promise.resolve(url);
         } else {
