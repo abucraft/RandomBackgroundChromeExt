@@ -15,7 +15,7 @@
         "webRequestBlocking",
         "webRequest",
         "tabs",
-        "contextMenus",
+        "activeTab",
         "nativeMessaging"
     ],
     "optional_permissions": [
@@ -37,8 +37,5 @@
             "bg/headerModifier.js",
             "bg/scriptInjector.js"
         ]
-    },
-    "web_accessible_resources": [
-        "cs/setting.html"
-    ]
+    }
 }
