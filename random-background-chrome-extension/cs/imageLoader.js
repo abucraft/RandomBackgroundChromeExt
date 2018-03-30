@@ -6,6 +6,7 @@ chrome.runtime.sendMessage({ type: 'QUERY' }, function (response) {
 var canvas = document.createElement('canvas');
 var ctx = canvas.getContext('2d');
 var img = new Image();
+var base64Url, imageType;
 
 function onloadImage(data) {
     vm.image = data;
@@ -13,6 +14,8 @@ function onloadImage(data) {
     var imageSrc = data.url;
     if (data.data) {
         imageSrc = getImageSrcFromBase64(data.url, data.data);
+        base64Url = imageSrc;
+        imageType = mapImageType(data.url);
     }
     $(`<style id="rbkstyle" type="text/css">body{ background-image:url(${imageSrc}) !important;background-size:cover !important; }  </style>`).appendTo($('body'));
     img.onload = function () {
