@@ -9,6 +9,12 @@
     left: 6px;
 }
 
+.top-left-secondary {
+    position: fixed;
+    top: 10px;
+    left: 136px;
+}
+
 .button-text{
     vertical-align: middle;
     text-transform: initial;

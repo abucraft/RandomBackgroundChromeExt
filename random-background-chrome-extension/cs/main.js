@@ -12,6 +12,8 @@ var vm = {};
 vm.strings = {
     background_settings: 'background settings',
     background_settings_zh: '背景设置',
+    download_image: 'download image',
+    download_image_zh: '下载图片',
     name: 'Settings',
     name_zh: '设置',
     link: 'image link',
@@ -211,6 +213,17 @@ $.get(chrome.runtime.getURL('cs/setting.html'), function (data) {
             apply: function () {
                 chrome.runtime.sendMessage({ type: 'APPLY_SETTINGS', data: { sources: vm.items, settings: vm.settings } });
                 hideDrawer();
+            },
+            downloadImage: function() {
+                var url = base64Url;
+                var saveName = 'bg_download_' + Date.parse(new Date()) + '.' + imageType;
+
+                var aLink = document.createElement('a');
+                aLink.href = url;
+                aLink.download = saveName || '';
+                var event = new MouseEvent('click');
+
+                aLink.dispatchEvent(event);
             },
             refresh: function () {
                 querySettings();

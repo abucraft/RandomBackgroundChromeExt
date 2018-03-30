@@ -7,6 +7,14 @@
         {{getString(strings,'background_settings')}}
         </span>
     </button>
+    <button class="mdl-button mdl-js-button top-left-secondary" v-on:click="downloadImage" v-mdl>
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 1000 1000">
+            <path d="M990,509.5L855.6,375.3L595.2,635.7V1H405.1v634.6L144.4,375L10,509.4L500,999L990,509.5z"/>
+        </svg>
+        <span class="button-text">
+        {{getString(strings,'download_image')}}
+        </span>
+    </button>
     <div class="mdl-layout__drawer fixed">
         <div class="mdl-layout-title">
             <span class="inline-block">{{getString(strings,'name')}}</span>
