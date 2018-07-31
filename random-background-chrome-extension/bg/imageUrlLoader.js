@@ -49,6 +49,10 @@ var imageUrlLoader = (function () {
         } else if (rule.type === "image_html") {
             let srcLink = getLinkHtml(rule, item);
             return Promise.resolve({ url: $(item).attr(rule.imageUrlAttr), link: srcLink });
+        } else if(rule.type == "flickr"){
+            let list = [];
+            let itemPromise = getFlickrItemsList(rule, list);
+            return itemPromise;
         } else {
             return Promise.resolve([]);
         }
@@ -99,6 +103,34 @@ var imageUrlLoader = (function () {
             return Promise.resolve(list);
         }
     }
+
+    function getFlickrItemsList(rule, list) {
+        return new Promise(function (resolve, reject) {
+            $.get('https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=e27813d9489e931448220614336b78b6', function (data) {
+                console.log(data)
+                var xpathResult = data.evaluate('.//photo', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+                console.log(xpathResult)
+                if(xpathResult != undefined && xpathResult.snapshotLength > 0){
+                    var ranIndex = Math.floor(Math.random() * xpathResult.snapshotLength);
+                    var ranItem = xpathResult.snapshotItem(ranIndex);
+
+                    var id = ranItem.attributes.id.nodeValue;
+                    var secret = ranItem.attributes.secret.nodeValue;
+                    var server = ranItem.attributes.server.nodeValue;
+                    var farm = ranItem.attributes.farm.nodeValue;
+                    var owner = ranItem.attributes.owner.nodeValue;
+
+                    var url = 'https://farm'+farm+'.staticflickr.com/'+server+'/'+id+'_'+secret+'_b'+'.jpg';
+                    var link = 'https://www.flickr.com/photos/'+owner+'/'+id+'/in/feed';
+                    resolve([{url:url, link:link}]);
+
+                } else {
+                    resolve([]);
+                }
+            }).fail(function () { resolve([]);});
+        })
+    }
+
 
     function getItemsListHtml(rule, url, list) {
         if (url) {
@@ -330,3 +362,4 @@ var imageUrlLoader = (function () {
     }
     return { parseAndLoad }
 })();
+

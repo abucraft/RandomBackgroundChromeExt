@@ -8,7 +8,14 @@ var datas = [];
 var urls = [];
 var cache_urls = [];
 //LOG_ENABLE = true;
-var sources = [bing, artstation, pixiv, fiveHundred, custom];
+var sources = [
+    bing,
+    artstation,
+    pixiv,
+    fiveHundred,
+    flickr,
+    custom
+];
 var rootSetting = {
     sources: sources,
     settings: {}
