@@ -50,9 +50,7 @@ var imageUrlLoader = (function () {
             let srcLink = getLinkHtml(rule, item);
             return Promise.resolve({ url: $(item).attr(rule.imageUrlAttr), link: srcLink });
         } else if(rule.type == "flickr"){
-            let list = [];
-            let itemPromise = getFlickrItemsList(rule, list);
-            return itemPromise;
+            return getFlickrItemsList(rule);
         } else {
             return Promise.resolve([]);
         }
@@ -104,10 +102,9 @@ var imageUrlLoader = (function () {
         }
     }
 
-    function getFlickrItemsList(rule, list) {
+    function getFlickrItemsList(flickrRule) {
         return new Promise(function (resolve, reject) {
-            $.get('https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=e27813d9489e931448220614336b78b6', function (data) {
-                console.log(data)
+            $.get(flickrRule.url, function (data) {
                 var xpathResult = data.evaluate('.//photo', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
                 console.log(xpathResult)
                 if(xpathResult != undefined && xpathResult.snapshotLength > 0){
