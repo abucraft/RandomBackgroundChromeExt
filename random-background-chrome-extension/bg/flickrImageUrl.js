@@ -4,9 +4,11 @@ var flickr = (function () {
             {
                 type: "flickr",
                 url: "https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=e27813d9489e931448220614336b78b6",
+                sizeUrl: "https://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=e27813d9489e931448220614336b78b6",
                 item: {
                     type: "flickr",
                     url: "https://api.flickr.com/services/rest/?method=flickr.interestingness.getList&api_key=e27813d9489e931448220614336b78b6",
+                    sizeUrl: "https://api.flickr.com/services/rest/?method=flickr.photos.getSizes&api_key=e27813d9489e931448220614336b78b6",
                     link: "https://www.flickr.com/",
                 },
                 restrict: 1,
