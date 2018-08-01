@@ -32,6 +32,7 @@
             "bg/artstationImageUrl.js",
             "bg/pixivImageUrl.js",
             "bg/fiveHImageUrl.js",
+            "bg/flickrImageUrl.js",
             "bg/customImageUrl.js",
             "bg/background.js",
             "bg/headerModifier.js",
