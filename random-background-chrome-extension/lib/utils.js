@@ -147,3 +147,27 @@ function _getString(store, key) {
     }
     return store[postfixed] ? store[postfixed] : store[key];
 }
+
+var localCache = [];
+
+function _readCache(key) {
+    function isExpired(cacheEntry) {
+        return ((cacheEntry.ttl > 0) && (cacheEntry.ttl + cacheEntry.createdAt) < (new Date().getTime()));
+    }
+
+    if(localCache[key] == undefined || isExpired(localCache[key])){
+        return undefined;
+    } else {
+        return localCache[key].value;
+    }
+}
+
+function _writeCache(key, value, ttl) {
+    if(key != undefined && value != undefined && ttl != undefined){
+        localCache[key] = {
+            value: value,
+            createdAt: new Date().getTime(),
+            ttl: ttl
+        }
+    }
+}

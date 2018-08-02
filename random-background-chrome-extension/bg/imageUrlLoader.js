@@ -104,26 +104,49 @@ var imageUrlLoader = (function () {
 
     function getFlickrItemsList(flickrRule) {
         return new Promise(function (resolve, reject) {
-            $.get(flickrRule.url, function (data) {
-                var xpathResult = data.evaluate('.//photo', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-                console.log(xpathResult)
-                if(xpathResult != undefined && xpathResult.snapshotLength > 0){
-                    var ranIndex = Math.floor(Math.random() * xpathResult.snapshotLength);
-                    var ranItem = xpathResult.snapshotItem(ranIndex);
+            let xpathResult = _readCache('flickr_photos');
+            if(xpathResult != undefined){
+                getFlickrItems(xpathResult, flickrRule).then(function (res) {
+                    resolve(res);
+                });
+            } else {
+                $.get(flickrRule.url, function (data) {
+                    var xpathResult = data.evaluate('.//photo', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+                    if (xpathResult != undefined && xpathResult.snapshotLength > 0) {
+                        _writeCache('flickr_photos', xpathResult, 600000);
+                        getFlickrItems(xpathResult, flickrRule).then(function (res) {
+                            resolve(res);
+                        });
 
-                    var id = ranItem.attributes.id.nodeValue;
-                    var secret = ranItem.attributes.secret.nodeValue;
-                    var server = ranItem.attributes.server.nodeValue;
-                    var farm = ranItem.attributes.farm.nodeValue;
-                    var owner = ranItem.attributes.owner.nodeValue;
+                    } else {
+                        resolve([]);
+                    }
 
-                    var url = 'https://farm'+farm+'.staticflickr.com/'+server+'/'+id+'_'+secret+'_b'+'.jpg';
-                    var link = 'https://www.flickr.com/photos/'+owner+'/'+id+'/in/feed';
-                    resolve([{url:url, link:link}]);
-
-                } else {
+                }).fail(function () {
                     resolve([]);
+                });
+            }
+        })
+    }
+
+    function getFlickrItems(xpathResult, flickrRule){
+        return new Promise(function (resolve, reject) {
+            var ranIndex = Math.floor(Math.random() * xpathResult.snapshotLength);
+            var ranItem = xpathResult.snapshotItem(ranIndex);
+
+            var id = ranItem.attributes.id.nodeValue;
+            var owner = ranItem.attributes.owner.nodeValue;
+            var link = 'https://www.flickr.com/photos/'+owner+'/'+id+'/in/feed';
+
+            $.get(flickrRule.sizeUrl+'&photo_id='+id, function (data) {
+                var xpathResult = data.evaluate('.//size', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+                for(let i = xpathResult.snapshotLength-1; i>=0; i--) {
+                    let item = xpathResult.snapshotItem(i);
+                    if(item.attributes.label.nodeValue === 'Large' || item.attributes.label.nodeValue === 'Large 1600') {
+                        resolve([{url: item.attributes.source.nodeValue, link: link}]);
+                    }
                 }
+                resolve([]);
             }).fail(function () { resolve([]);});
         })
     }
