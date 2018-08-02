@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "__MSG_appName__",
     "description": "__MSG_appDesc__",
-    "version": "1.6.1",
+    "version": "1.7",
     "default_locale": "en",
     "icons": {
         "128": "icon.png"
@@ -21,6 +21,9 @@
     "optional_permissions": [
         "background"
     ],
+    "chrome_url_overrides": {
+        "newtab": "newtab.html"
+    },
     "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "background": {
         "scripts": [
@@ -30,16 +33,13 @@
             "bg/imageUrlLoader.js",
             "bg/bingImageUrl.js",
             "bg/artstationImageUrl.js",
-            "bg/pixivImageUrl.js",
-            "bg/fiveHImageUrl.js",
             "bg/flickrImageUrl.js",
-            "bg/customImageUrl.js",
             "bg/background.js",
-            "bg/headerModifier.js",
-            "bg/scriptInjector.js"
+            "bg/headerModifier.js"
         ]
     },
     "web_accessible_resources": [
-        "cs/setting.html"
+        "cs/setting.html",
+        "icon.png"
     ]
 }

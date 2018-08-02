@@ -34,15 +34,13 @@ vm.strings = {
     minute_zh: "分钟",
     hour: "h",
     hour_zh: "小时",
-    apply_on_google: 'apply on google',
-    apply_on_google_zh: '应用于谷歌首页',
     apply_on_desktop_wallpaper: 'apply on desktop wallpaper',
     apply_on_desktop_wallpaper_zh: '应用于桌面背景',
     run_in_background: 'run in background',
     run_in_background_zh: '后台运行',
 }
 vm.items = [];
-vm.settings = { applyOnGoogle: true, applyOnDesktopWallpaper: true, wallpaperUpdateTime: MINUTE }
+vm.settings = { applyOnDesktopWallpaper: true, wallpaperUpdateTime: MINUTE }
 vm.timeSegments = [0.5 * MINUTE, 5 * MINUTE, 15 * MINUTE, 30 * MINUTE, 60 * MINUTE, 3 * 60 * MINUTE, 12 * 60 * MINUTE];
 vm.newCustomUrl = '';
 vm.SECOND = SECOND;
@@ -131,7 +129,6 @@ Vue.directive('mdl-check-refresh', {
 function querySettings() {
     chrome.runtime.sendMessage({ type: 'QUERY_SETTINGS' }, function (response) {
         vm.items = response.sources;
-        console.log(response.settings)
         vm.settings = response.settings;
     })
 }
