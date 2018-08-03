@@ -245,3 +245,6 @@ ModelManifest.xml
 .fake/
 
 *.zip
+*.crx
+key.pem
+vue.js

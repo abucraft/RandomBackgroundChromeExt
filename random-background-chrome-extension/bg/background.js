@@ -11,10 +11,7 @@ var cache_urls = [];
 var sources = [
     bing,
     artstation,
-    pixiv,
-    fiveHundred,
-    flickr,
-    custom
+    flickr
 ];
 var rootSetting = {
     sources: sources,
@@ -47,16 +44,6 @@ Object.defineProperties(rootSetting.settings, {
         },
         set: function (value) {
             this._applyOnDesktopWallpaper = value
-        }
-    },
-    '_applyOnGoogle': { writable: true, value: true },
-    'applyOnGoogle': {
-        enumerable: true,
-        get: function () {
-            return this._applyOnGoogle
-        },
-        set: function (value) {
-            this._applyOnGoogle = value
         }
     },
     '_runInBackground': { writable: true, value: false },

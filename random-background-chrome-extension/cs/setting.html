@@ -49,7 +49,7 @@
             </button>
             <div class="sub closed" v-if="showSub(item)">
                 <div class="other" v-if="item.type==='other'">
-                    <div class="subitem" v-bind:key="api" v-for="(api,index) in item.apis" v-if="api.show" v-reheight="{index:index,item:item}">
+                    <div class="subitem" v-bind:key="api.name" v-for="(api,index) in item.apis" v-if="api.show" v-reheight="{index:index,item:item}">
                         <div class="place-holder"></div>
                         <label class="mdl-checkbox mdl-js-checkbox" v-bind:for="item.name+index" v-mdl>
                             <input v-bind:id="item.name+index" type="checkbox" class="mdl-checkbox__input" v-model="api.enabled" />
@@ -57,33 +57,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="custom" v-if="item.type==='custom'">
-                    <div class="subitem" v-bind:key="api" v-for="(api,index) in item.apis" v-reheight="{index:index,item:item}">
-                        <div class="place-holder"></div>
-                        <div class="mdl-textfield mdl-js-textfield inline-block" v-mdl>
-                            <input class="mdl-textfield__input" type="url" v-model="api.url" v-bind:id="item.name+index" />
-                            <label class="mdl-textfield__label" v-bind:for="item.name+index">URL</label>
-                        </div>
-                        <button class="mdl-button mdl-js-button mdl-button--icon url-close-button" v-on:click="removeCustomUrl(item,index)" v-mdl><svg  width="10px" height="100%" viewBox="0 0 1000 1000" enable-background="new 0 0 1000 1000" xml:space="preserve"><g><path d="M962.6,830.4L632.1,500l330.5-330.5c36.5-36.5,36.5-95.6,0-132.1c-36.5-36.4-95.6-36.5-132.2,0L500,367.8L169.5,37.4c-36.4-36.4-95.6-36.5-132.1,0c-36.5,36.5-36.4,95.7,0,132.1L367.8,500L37.4,830.4c-36.4,36.5-36.4,95.7,0,132.2c36.5,36.5,95.7,36.4,132.1,0L500,632.1l330.4,330.5c36.6,36.5,95.6,36.5,132.2,0C999.1,926.1,999.1,867,962.6,830.4z"/></g></svg></button>
-                    </div>
-                    <div class="subitem">
-                        <div class="place-holder"></div>
-                        <div class="mdl-textfield mdl-js-textfield inline-block" v-mdl>
-                            <input class="mdl-textfield__input" type="url" id="custom-url" v-model="newCustomUrl" v-on:keyup.enter="addCustomUrl(item)"
-                            />
-                            <label class="mdl-textfield__label" for="custom-url">URL</label>
-                        </div>
-                        <button class="mdl-button mdl-js-button mdl-button--icon url-close-button" v-on:click="addCustomUrl(item)" v-mdl>+</button>
-                    </div>
-                </div>
             </div>
-        </div>
-        <div class="item top-border">
-            <div class="place-holder"></div>
-            <label class="mdl-checkbox mdl-js-checkbox" for="applyOnGoogle" v-mdl>
-                    <input id="applyOnGoogle" type="checkbox" class="mdl-checkbox__input" v-mdl-check-refresh="{value:settings.applyOnGoogle}" v-model="settings.applyOnGoogle"/>
-                    <span class="mdl-checkbox__label">{{getString(strings,'apply_on_google')}}</span>
-            </label>
         </div>
         <div class="item">
             <div class="place-holder"></div>
