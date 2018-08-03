@@ -87,35 +87,11 @@ Object.defineProperties(rootSetting.settings, {
                 }
             })
         }
-    },
-    '_emptyNewTab': { writable: true, value: false },
-    'emptyNewTab': {
-        enumerable: true,
-        get: function () {
-            return this._emptyNewTab
-        },
-        set: function (value) {
-            this._emptyNewTab = value
-        }
-    },
+    }
 })
 
 start();
 storeData(0);
-
-function convertOldSettings(oldSetting) {
-    if (oldSetting.version === rootSetting.settings.version) {
-        return oldSetting;
-    }
-    var keys = Object.keys(oldSetting);
-    var newSetting = {};
-    for (let i in keys) {
-        var key = keys[i];
-        var newKey = key.replace('_', '');
-        newSetting[newKey] = oldSetting[key];
-    }
-    return newSetting;
-}
 
 function start() {
     var promises = [];
@@ -134,12 +110,12 @@ function start() {
     }
     var settings = localStorage.getItem('settings');
     if (settings) {
-        _copyJSON(rootSetting.settings, convertOldSettings(JSON.parse(settings)));
+        _copyJSON(rootSetting.settings, JSON.parse(settings));
     }
     // Begin to send wallpaper to desktop after prepared
     Promise.all(promises).then(function () {
         if (!wallpaperTimer) {
-            wallpaperTimer = setTimeout(sendWallpaper, rootSetting.settings._wallpaperUpdateTime);
+            wallpaperTimer = setTimeout(sendWallpaper, rootSetting.settings.wallpaperUpdateTime);
         }
     })
 }
@@ -177,17 +153,14 @@ function randomChooseSource() {
     return sources[i];
 }
 
-function getData() {
-    return new Promise(function (resolve, reject) {
-        var data = pickData();
-        if (data) {
-            resolve(data);
-        } else {
-            storeData(0).then(function () {
-                resolve(pickData());
-            })
-        }
-    });
+async function getData() {
+    var data = pickData();
+    if (data) {
+        return data;
+    } else {
+        await storeData(0);
+        return pickData();
+    }
 }
 
 function pickData() {
@@ -209,61 +182,45 @@ function pickData() {
     return url;
 }
 
-function storeData(roop = 0) {
-    var promise = null;
-    if (roop > MAX_RECURSIVE) {
-        return Promise.resolve();
-    }
-    if (datas.length + urls.length > MAX_CACHE) {
-        return Promise.resolve();
-    } else {
-        var rsrc = randomChooseSource();
-        if (!rsrc) {
-            return Promise.resolve();
-        } else {
-            promise = rsrc.getImageUrl();
+async function storeData(roop = 0) {
+    try {
+        var url = null;
+        if (roop > MAX_RECURSIVE) {
+            return;
         }
-    }
-    //add cache 
-    promise = promise.then(function (url) {
-        return new Promise(function (resolve, reject) {
-            if (url.url === undefined) {
-                reject("url undefined");
+        if (datas.length + urls.length > MAX_CACHE) {
+            return;
+        } else {
+            var rsrc = randomChooseSource();
+            if (!rsrc) {
                 return;
+            } else {
+                url = await rsrc.getImageUrl();
             }
-            var oReq = new XMLHttpRequest();
-            oReq.open("GET", url.url, true);
-            oReq.responseType = "arraybuffer";
-            if(url.url.indexOf('pximg')!=-1){
-                oReq.setRequestHeader('Referer',"https://pximg.net/")
-            }
-
-            oReq.onload = function (oEvent) {
-                console.log(oReq.status);
-                if (oReq.status === 200) {
-                    var arrayBuffer = oReq.response; // Note: not oReq.responseText
-                    var base64str = _arrayBufferToBase64(arrayBuffer);
-                    url.data = base64str;
-                    resolve(url)
-                } else {
-                    resolve(url);
-                }
-            };
-            oReq.send();
-        });
-    })
-    promise = promise.then(function (data) {
-        console.log(`get ${data.url}`);
-        if (data.data) {
-            datas.push(data);
-        } else {
-            urls.push(data);
         }
-    }, function (e) {
+        //add cache 
+        if(url.url === undefined){
+            console.error('url undefined in ', url);
+            return storeData(roop + 1);
+        }
+        const response = await fetch(url.url);
+        if(response.status===200){
+            const arrayBuffer = await response.arrayBuffer();
+            const base64str = _arrayBufferToBase64(arrayBuffer);
+            url.data = base64str;
+        }
+        console.log(`get ${url.url}`);
+        if (url.data) {
+            datas.push(url);
+        } else {
+            urls.push(url);
+        }
+        return url;
+    }
+    catch (e) {
         console.error(e);
         return storeData(roop + 1);
-    });
-    return promise;
+    }
 }
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
