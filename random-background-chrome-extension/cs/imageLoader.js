@@ -8,7 +8,7 @@ var ctx = canvas.getContext('2d');
 var img = new Image();
 var base64Url, imageType;
 
-function onloadImage(data) {
+async function onloadImage(data) {
     vm.image = data;
     console.log(data);
     var imageSrc = data.url;
@@ -25,19 +25,13 @@ function onloadImage(data) {
         img.src = getImageSrcFromBase64(data.url, data.data);
         afterRendered();
     } else {
-        var oReq = new XMLHttpRequest();
-        oReq.open("GET", data.url, true);
-        oReq.responseType = "arraybuffer";
-        oReq.onload = function (oEvent) {
-            var arrayBuffer = oReq.response; // Note: not oReq.responseText
-            var base64str = _arrayBufferToBase64(arrayBuffer);
+        const response = await _fetchWithCredential(data.url);
+        if (response.status === 200) {
+            const arrayBuffer = await response.arrayBuffer();
+            const base64str = _arrayBufferToBase64(arrayBuffer);
             img.src = getImageSrcFromBase64(data.url, base64str);
             afterRendered();
-        };
-        oReq.send();
-        oReq.onerror = function (e) {
-            console.error(e);
-        };
+        }
     }
 }
 

@@ -29,8 +29,8 @@ function _shuffle(array) {
 
 function _randomPick(list, limit) {
     var nList = [];
-    if(!limit){
-        limit=list.length;
+    if (!limit) {
+        limit = list.length;
     }
     for (var i = 0; i < limit; i++) {
         if (list.length === 0) {
@@ -155,7 +155,7 @@ function _readCache(key) {
         return ((cacheEntry.ttl > 0) && (cacheEntry.ttl + cacheEntry.createdAt) < (new Date().getTime()));
     }
 
-    if(localCache[key] == undefined || isExpired(localCache[key])){
+    if (localCache[key] == undefined || isExpired(localCache[key])) {
         return undefined;
     } else {
         return localCache[key].value;
@@ -163,11 +163,15 @@ function _readCache(key) {
 }
 
 function _writeCache(key, value, ttl) {
-    if(key != undefined && value != undefined && ttl != undefined){
+    if (key != undefined && value != undefined && ttl != undefined) {
         localCache[key] = {
             value: value,
             createdAt: new Date().getTime(),
             ttl: ttl
         }
     }
+}
+
+async function _fetchWithCredential(url, settings = {}) {
+    return fetch(url, { ...settings, credentials: 'same-origin' })
 }
