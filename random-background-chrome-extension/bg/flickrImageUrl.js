@@ -25,19 +25,16 @@ var flickr = (function () {
         api: api
     }
 
-    function getImageUrl() {
+    async function getImageUrl() {
         var imageList = [];
-        return imageUrlLoader.parseAndLoad(exported.api, imageList).then(function () {
-            if (imageList.length > 0) {
-                var url = imageList.shift();
-                url.favicon = exported.api.favicon;
-                return url;
-            } else {
-                throw "Can not fetch image url from flickr";
-            }
-        }, function (e) {
-            console.error(e);
-        });
+        await imageUrlLoader.parseAndLoad(exported.api, imageList);
+        if (imageList.length > 0) {
+            var url = imageList.shift();
+            url.favicon = exported.api.favicon;
+            return url;
+        } else {
+            throw "Can not fetch image url from flickr";
+        }
     }
     return exported;
 })();

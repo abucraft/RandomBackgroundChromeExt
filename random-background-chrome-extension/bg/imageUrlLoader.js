@@ -2,7 +2,7 @@
 var imageUrlLoader = (function () {
     var curRule = null;
     var curUrlKey = "oiq3iri384jj";
-    function parseAndLoad(structure, imageList) {
+    async function parseAndLoad(structure, imageList) {
         curRule = structure;
         var apis = structure.apis;
         var promises = [];
@@ -20,43 +20,33 @@ var imageUrlLoader = (function () {
         });
     }
 
-    function getAllItems(item, rule) {
+    async function getAllItems(item, rule) {
         if (rule.type === 'info_json') {
             let url = fillUrl(rule, item);
             let list = [];
-            let itemPromise = getItemsList(rule, url, list);
-            function afterPromise() {
-                let finalList = _randomPick(list, rule.restrict);
-                return finalList;
-            }
-            itemPromise = itemPromise.then(afterPromise, afterPromise);
-            return itemPromise;
+            await getItemsList(rule, url, list);
+            return _randomPick(list, rule.restrict);
         } else if (rule.type === "image_json") {
             let srcLink = item.getLink;
             srcLink = srcLink ? srcLink : getLink(rule, item);
             //console.warn(srcLink);
-            return Promise.resolve({ url: getValFromPath(item, rule.imageUrlPath), link: srcLink });
+            return { url: getValFromPath(item, rule.imageUrlPath), link: srcLink }
         } else if (rule.type === "info_html") {
             let url = fillUrlHtml(rule, item);
             let list = [];
-            let itemPromise = getItemsListHtml(rule, url, list);
-            function afterPromise() {
-                let finalList = _randomPick(list, rule.restrict);
-                return finalList;
-            }
-            itemPromise = itemPromise.then(afterPromise, afterPromise);
-            return itemPromise;
+            await getItemsListHtml(rule, url, list);
+            return _randomPick(list, rule.restrict);
         } else if (rule.type === "image_html") {
             let srcLink = getLinkHtml(rule, item);
-            return Promise.resolve({ url: $(item).attr(rule.imageUrlAttr), link: srcLink });
-        } else if(rule.type == "flickr"){
+            return { url: $(item).attr(rule.imageUrlAttr), link: srcLink }
+        } else if (rule.type == "flickr") {
             return getFlickrItemsList(rule);
         } else {
-            return Promise.resolve([]);
+            return [];
         }
     }
 
-    function getAll(items, rule) {
+    async function getAll(items, rule) {
         if (rule) {
             var promises = [];
             for (var i = 0; i < items.length; i++) {
@@ -68,68 +58,66 @@ var imageUrlLoader = (function () {
             })
         } else {
             console.log("search finish");
-            return Promise.resolve(items);
+            return items;
         }
     }
 
-    function getItemsList(rule, url, list) {
+    async function getItemsList(rule, url, list) {
         if (url) {
-            return new Promise(function (resolve, reject) {
-                $.getJSON(url, function (data) {
-                    var link = getLink(rule, data);
-                    var item = getValFromPath(data, rule.item.path);
-                    if (item.length) {
-                        for (let i = 0; i < item.length; i++) {
-                            item[i][curUrlKey] = url;
-                        }
-                        list.push.apply(list, item);
-                    } else {
-                        item[curUrlKey] = url;
-                        list.push(item);
+            const response = await fetch(url);
+            if (response.status === 200) {
+                const data = await response.json();
+                const link = getLink(rule, data);
+                const item = getValFromPath(data, rule.item.path);
+                if (item.length) {
+                    for (let i = 0; i < item.length; i++) {
+                        item[i][curUrlKey] = url;
                     }
-                    // if link is in parent, then bind link to all the children
-                    list.forEach(function (it) { it.getLink = link })
-                    var nextUrl = getValFromPath(data, rule.nextUrl);
-                    if (nextUrl) {
-                        getItemsList(rule, nextUrl, list).then(function () { resolve(list) });
-                    } else {
-                        resolve(list);
-                    }
-                }).fail(function () { resolve(list) });
-            });
+                    list.push.apply(list, item);
+                } else {
+                    item[curUrlKey] = url;
+                    list.push(item);
+                }
+                // if link is in parent, then bind link to all the children
+                list.forEach(function (it) { it.getLink = link })
+                var nextUrl = getValFromPath(data, rule.nextUrl);
+                if (nextUrl) {
+                    return getItemsList(rule, nextUrl, list);
+                } else {
+                    return list
+                }
+            }
         } else {
-            return Promise.resolve(list);
+            return list;
         }
     }
 
-    function getFlickrItemsList(flickrRule) {
-        return new Promise(function (resolve, reject) {
-            $.get(flickrRule.url, function (data) {
-                var xpathResult = data.evaluate('.//photo', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-                console.log(xpathResult)
-                if(xpathResult != undefined && xpathResult.snapshotLength > 0){
-                    var ranIndex = Math.floor(Math.random() * xpathResult.snapshotLength);
-                    var ranItem = xpathResult.snapshotItem(ranIndex);
+    async function getFlickrItemsList(flickrRule) {
+        const response = await fetch(flickrRule.url);
+        const text = await response.text();
+        const data = (new DOMParser()).parseFromString(text, 'text/xml');
+        const xpathResult = data.evaluate('.//photo', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+        console.log(xpathResult)
+        if (xpathResult != undefined && xpathResult.snapshotLength > 0) {
+            var ranIndex = Math.floor(Math.random() * xpathResult.snapshotLength);
+            var ranItem = xpathResult.snapshotItem(ranIndex);
 
-                    var id = ranItem.attributes.id.nodeValue;
-                    var secret = ranItem.attributes.secret.nodeValue;
-                    var server = ranItem.attributes.server.nodeValue;
-                    var farm = ranItem.attributes.farm.nodeValue;
-                    var owner = ranItem.attributes.owner.nodeValue;
+            var id = ranItem.attributes.id.nodeValue;
+            var secret = ranItem.attributes.secret.nodeValue;
+            var server = ranItem.attributes.server.nodeValue;
+            var farm = ranItem.attributes.farm.nodeValue;
+            var owner = ranItem.attributes.owner.nodeValue;
 
-                    var url = 'https://farm'+farm+'.staticflickr.com/'+server+'/'+id+'_'+secret+'_b'+'.jpg';
-                    var link = 'https://www.flickr.com/photos/'+owner+'/'+id+'/in/feed';
-                    resolve([{url:url, link:link}]);
-
-                } else {
-                    resolve([]);
-                }
-            }).fail(function () { resolve([]);});
-        })
+            var url = 'https://farm' + farm + '.staticflickr.com/' + server + '/' + id + '_' + secret + '_b' + '.jpg';
+            var link = 'https://www.flickr.com/photos/' + owner + '/' + id + '/in/feed';
+            return [{ url: url, link: link }];
+        } else {
+            return [];
+        }
     }
 
 
-    function getItemsListHtml(rule, url, list) {
+    async function getItemsListHtml(rule, url, list) {
         if (url) {
             if (url instanceof Array) {
                 let promises = [];
@@ -138,37 +126,35 @@ var imageUrlLoader = (function () {
                 }
                 return Promise.all(promises);
             } else {
-                return new Promise(function (resolve, reject) {
-                    $.get(url, function (data) {
-                        data = data.replace(/\ssrc=/g, ' custom-src=');
-                        data = $(data);
-                        var link = getLinkHtml(rule, data);
-                        var item = getValFromPathHtml(data, rule.item.path, rule.item.filter);
-                        if (item.length) {
-                            for (let i = 0; i < item.length; i++) {
-                                item[i][curUrlKey] = url;
-                            }
-                            list.push.apply(list, item);
-                        } else {
-                            item[curUrlKey] = url;
-                            list.push(item);
-                        }
-                        // if link is in parent, then bind link to all the children
-                        list.forEach(function (it) { it.getLink = link })
-                        let nextUrl;
-                        if (rule.nextUrl) {
-                            nextUrl = fillUrlHtml(rule.nextUrl, data);
-                        }
-                        if (nextUrl) {
-                            getItemsListHtml(rule, nextUrl, list).then(function () { resolve(list) });
-                        } else {
-                            resolve(list);
-                        }
-                    }, 'text').fail(function () { resolve(list) });
-                })
+                const response = await fetch(url);
+                let data = response.text();
+                data = data.replace(/\ssrc=/g, ' custom-src=');
+                data = $(data);
+                var link = getLinkHtml(rule, data);
+                var item = getValFromPathHtml(data, rule.item.path, rule.item.filter);
+                if (item.length) {
+                    for (let i = 0; i < item.length; i++) {
+                        item[i][curUrlKey] = url;
+                    }
+                    list.push.apply(list, item);
+                } else {
+                    item[curUrlKey] = url;
+                    list.push(item);
+                }
+                // if link is in parent, then bind link to all the children
+                list.forEach(function (it) { it.getLink = link })
+                let nextUrl;
+                if (rule.nextUrl) {
+                    nextUrl = fillUrlHtml(rule.nextUrl, data);
+                }
+                if (nextUrl) {
+                    return getItemsListHtml(rule, nextUrl, list);
+                } else {
+                    return list;
+                }
             }
         } else {
-            return Promise.resolve(list);
+            return list;
         }
     }
     function fillUrl(rule, obj) {
