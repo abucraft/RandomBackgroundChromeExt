@@ -64,7 +64,7 @@ var imageUrlLoader = (function () {
 
     async function getItemsList(rule, url, list) {
         if (url) {
-            const response = await fetch(url);
+            const response = await _fetchWithCredential(url);
             if (response.status === 200) {
                 const data = await response.json();
                 const link = getLink(rule, data);
@@ -93,27 +93,42 @@ var imageUrlLoader = (function () {
     }
 
     async function getFlickrItemsList(flickrRule) {
-        const response = await fetch(flickrRule.url);
+        let xpathResult = _readCache('flickr_photos');
+        if (xpathResult != undefined) {
+            return getFlickrItems(xpathResult, flickrRule);
+        } else {
+            const response = await _fetchWithCredential(flickrRule.url);
+            const text = await response.text();
+            const data = (new DOMParser()).parseFromString(text, 'text/xml');
+            var xpathResult = data.evaluate('.//photo', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+            if (xpathResult != undefined && xpathResult.snapshotLength > 0) {
+                _writeCache('flickr_photos', xpathResult, 600000);
+                return getFlickrItems(xpathResult, flickrRule)
+            } else {
+                return [];
+            }
+        }
+    }
+
+    async function getFlickrItems(xpathResult, flickrRule) {
+        var ranIndex = Math.floor(Math.random() * xpathResult.snapshotLength);
+        var ranItem = xpathResult.snapshotItem(ranIndex);
+
+        var id = ranItem.attributes.id.nodeValue;
+        var owner = ranItem.attributes.owner.nodeValue;
+        var link = 'https://www.flickr.com/photos/' + owner + '/' + id + '/in/feed';
+
+        const response = await _fetchWithCredential(flickrRule.sizeUrl + '&photo_id=' + id);
         const text = await response.text();
         const data = (new DOMParser()).parseFromString(text, 'text/xml');
-        const xpathResult = data.evaluate('.//photo', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-        console.log(xpathResult)
-        if (xpathResult != undefined && xpathResult.snapshotLength > 0) {
-            var ranIndex = Math.floor(Math.random() * xpathResult.snapshotLength);
-            var ranItem = xpathResult.snapshotItem(ranIndex);
-
-            var id = ranItem.attributes.id.nodeValue;
-            var secret = ranItem.attributes.secret.nodeValue;
-            var server = ranItem.attributes.server.nodeValue;
-            var farm = ranItem.attributes.farm.nodeValue;
-            var owner = ranItem.attributes.owner.nodeValue;
-
-            var url = 'https://farm' + farm + '.staticflickr.com/' + server + '/' + id + '_' + secret + '_b' + '.jpg';
-            var link = 'https://www.flickr.com/photos/' + owner + '/' + id + '/in/feed';
-            return [{ url: url, link: link }];
-        } else {
-            return [];
+        const xpathResult = data.evaluate('.//size', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+        for (let i = xpathResult.snapshotLength - 1; i >= 0; i--) {
+            let item = xpathResult.snapshotItem(i);
+            if (item.attributes.label.nodeValue === 'Large' || item.attributes.label.nodeValue === 'Large 1600') {
+                return [{ url: item.attributes.source.nodeValue, link: link }]
+            }
         }
+        return [];
     }
 
 
