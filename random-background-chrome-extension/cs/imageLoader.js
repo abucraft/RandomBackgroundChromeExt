@@ -25,7 +25,7 @@ async function onloadImage(data) {
         img.src = getImageSrcFromBase64(data.url, data.data);
         afterRendered();
     } else {
-        const response = await fetch(data.url);
+        const response = await _fetchWithCredential(data.url);
         if (response.status === 200) {
             const arrayBuffer = await response.arrayBuffer();
             const base64str = _arrayBufferToBase64(arrayBuffer);

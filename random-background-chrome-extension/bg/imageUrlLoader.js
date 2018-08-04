@@ -100,7 +100,7 @@ var imageUrlLoader = (function () {
             const response = await _fetchWithCredential(flickrRule.url);
             const text = await response.text();
             const data = (new DOMParser()).parseFromString(text, 'text/xml');
-            var xpathResult = data.evaluate('.//photo', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+            xpathResult = data.evaluate('.//photo', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
             if (xpathResult != undefined && xpathResult.snapshotLength > 0) {
                 _writeCache('flickr_photos', xpathResult, 600000);
                 return getFlickrItems(xpathResult, flickrRule)
@@ -121,7 +121,7 @@ var imageUrlLoader = (function () {
         const response = await _fetchWithCredential(flickrRule.sizeUrl + '&photo_id=' + id);
         const text = await response.text();
         const data = (new DOMParser()).parseFromString(text, 'text/xml');
-        const xpathResult = data.evaluate('.//size', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+        xpathResult = data.evaluate('.//size', data, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
         for (let i = xpathResult.snapshotLength - 1; i >= 0; i--) {
             let item = xpathResult.snapshotItem(i);
             if (item.attributes.label.nodeValue === 'Large' || item.attributes.label.nodeValue === 'Large 1600') {
@@ -141,7 +141,7 @@ var imageUrlLoader = (function () {
                 }
                 return Promise.all(promises);
             } else {
-                const response = await fetch(url);
+                const response = await _fetchWithCredential(url);
                 let data = response.text();
                 data = data.replace(/\ssrc=/g, ' custom-src=');
                 data = $(data);

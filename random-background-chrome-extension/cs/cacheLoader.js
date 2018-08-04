@@ -3,7 +3,7 @@ function loadCache() {
     chrome.runtime.sendMessage({ type: 'CACHE_REQUEST' }, async function (response) {
         if (response) {
             const url = response;
-            const res = await fetch(url.url);
+            const res = await _fetchWithCredential(url.url);
             if (res.status === 200) {
                 const arrayBuffer = await res.arrayBuffer();
                 const base64str = _arrayBufferToBase64(arrayBuffer);

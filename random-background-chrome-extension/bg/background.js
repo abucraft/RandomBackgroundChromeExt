@@ -158,7 +158,7 @@ async function getData() {
     if (data) {
         return data;
     } else {
-        await storeData(0);
+        await storeData(0, false);
         return pickData();
     }
 }
@@ -182,7 +182,7 @@ function pickData() {
     return url;
 }
 
-async function storeData(roop = 0) {
+async function storeData(roop = 0, fetchImage = true) {
     try {
         var url = null;
         if (roop > MAX_RECURSIVE) {
@@ -199,15 +199,17 @@ async function storeData(roop = 0) {
             }
         }
         //add cache 
-        if(url.url === undefined){
+        if (url.url === undefined) {
             console.error('url undefined in ', url);
             return storeData(roop + 1);
         }
-        const response = await fetch(url.url);
-        if(response.status===200){
-            const arrayBuffer = await response.arrayBuffer();
-            const base64str = _arrayBufferToBase64(arrayBuffer);
-            url.data = base64str;
+        if (fetchImage) {
+            const response = await _fetchWithCredential(url.url);
+            if (response.status === 200) {
+                const arrayBuffer = await response.arrayBuffer();
+                const base64str = _arrayBufferToBase64(arrayBuffer);
+                url.data = base64str;
+            }
         }
         console.log(`get ${url.url}`);
         if (url.data) {
