@@ -1,31 +1,37 @@
 <div id="setting-panel">
-    <button class="mdl-button mdl-js-button top-left" v-on:click="open" v-mdl>
-        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="24px" height="24px" viewBox="0 0 24 24">
-            <path d="M19.4,13c0-0.3,0.1-0.6,0.1-1s0-0.7-0.1-1l2.1-1.7c0.2-0.2,0.2-0.4,0.1-0.6l-2-3.5C19.5,5.1,19.3,5,19,5.1l-2.5,1 c-0.5-0.4-1.1-0.7-1.7-1l-0.4-2.6C14.5,2.2,14.2,2,14,2h-4C9.8,2,9.5,2.2,9.5,2.4L9.1,5.1C8.5,5.3,8,5.7,7.4,6.1L5,5.1 C4.7,5,4.5,5.1,4.3,5.3l-2,3.5C2.2,8.9,2.3,9.2,2.5,9.4L4.6,11c0,0.3-0.1,0.6-0.1,1s0,0.7,0.1,1l-2.1,1.7 c-0.2,0.2-0.2,0.4-0.1,0.6l2,3.5C4.5,18.9,4.7,19,5,18.9l2.5-1c0.5,0.4,1.1,0.7,1.7,1l0.4,2.6c0,0.2,0.2,0.4,0.5,0.4h4 c0.2,0,0.5-0.2,0.5-0.4l0.4-2.6c0.6-0.3,1.2-0.6,1.7-1l2.5,1c0.2,0.1,0.5,0,0.6-0.2l2-3.5c0.1-0.2,0.1-0.5-0.1-0.6L19.4,13z M12,15.5c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S13.9,15.5,12,15.5z"></path>
-        </svg>
-        <span class="button-text">
-        {{getString(strings,'background_settings')}}
-        </span>
-    </button>
-    <button class="mdl-button mdl-js-button top-left-secondary" v-on:click="downloadImage" v-mdl>
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 1000 1000">
-            <path d="M990,509.5L855.6,375.3L595.2,635.7V1H405.1v634.6L144.4,375L10,509.4L500,999L990,509.5z"/>
-        </svg>
-        <span class="button-text">
-        {{getString(strings,'download_image')}}
-        </span>
-    </button>
+    <div class="top-left">
+        <button class="mdl-button mdl-js-button" v-on:click="open" v-mdl>
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="24px" height="24px" viewBox="0 0 24 24">
+                <path d="M19.4,13c0-0.3,0.1-0.6,0.1-1s0-0.7-0.1-1l2.1-1.7c0.2-0.2,0.2-0.4,0.1-0.6l-2-3.5C19.5,5.1,19.3,5,19,5.1l-2.5,1 c-0.5-0.4-1.1-0.7-1.7-1l-0.4-2.6C14.5,2.2,14.2,2,14,2h-4C9.8,2,9.5,2.2,9.5,2.4L9.1,5.1C8.5,5.3,8,5.7,7.4,6.1L5,5.1 C4.7,5,4.5,5.1,4.3,5.3l-2,3.5C2.2,8.9,2.3,9.2,2.5,9.4L4.6,11c0,0.3-0.1,0.6-0.1,1s0,0.7,0.1,1l-2.1,1.7 c-0.2,0.2-0.2,0.4-0.1,0.6l2,3.5C4.5,18.9,4.7,19,5,18.9l2.5-1c0.5,0.4,1.1,0.7,1.7,1l0.4,2.6c0,0.2,0.2,0.4,0.5,0.4h4 c0.2,0,0.5-0.2,0.5-0.4l0.4-2.6c0.6-0.3,1.2-0.6,1.7-1l2.5,1c0.2,0.1,0.5,0,0.6-0.2l2-3.5c0.1-0.2,0.1-0.5-0.1-0.6L19.4,13z M12,15.5c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S13.9,15.5,12,15.5z"></path>
+            </svg>
+            <span class="button-text">
+                {{getString(strings,'background_settings')}}
+            </span>
+        </button>
+        <button class="mdl-button mdl-js-button" v-on:click="downloadImage" v-mdl>
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 1000 1000">
+                <path d="M990,509.5L855.6,375.3L595.2,635.7V1H405.1v634.6L144.4,375L10,509.4L500,999L990,509.5z" />
+            </svg>
+            <span class="button-text">
+                {{getString(strings,'download_image')}}
+            </span>
+        </button>
+    </div>
     <div class="mdl-layout__drawer fixed">
         <div class="mdl-layout-title">
             <span class="inline-block">{{getString(strings,'name')}}</span>
             <button class="mdl-button mdl-js-button mdl-button--icon" v-on:click="refresh" v-mdl>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="100%" viewBox="0 0 18 18"><path d="M9 13.5c-2.49 0-4.5-2.01-4.5-4.5S6.51 4.5 9 4.5c1.24 0 2.36.52 3.17 1.33L10 8h5V3l-1.76 1.76C12.15 3.68 10.66 3 9 3 5.69 3 3.01 5.69 3.01 9S5.69 15 9 15c2.97 0 5.43-2.16 5.9-5h-1.52c-.46 2-2.24 3.5-4.38 3.5z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="100%" viewBox="0 0 18 18">
+                    <path d="M9 13.5c-2.49 0-4.5-2.01-4.5-4.5S6.51 4.5 9 4.5c1.24 0 2.36.52 3.17 1.33L10 8h5V3l-1.76 1.76C12.15 3.68 10.66 3 9 3 5.69 3 3.01 5.69 3.01 9S5.69 15 9 15c2.97 0 5.43-2.16 5.9-5h-1.52c-.46 2-2.24 3.5-4.38 3.5z"
+                    />
+                </svg>
             </button>
         </div>
         <div class="item bottom-border" v-if="image.link">
             <div class="place-holder"></div>
             <span class="item-name">{{getString(strings,'link')}}</span>
-            <a class="mdl-button mdl-js-button button-text button-link" target="_blank" v-bind:href="image.link"><img height="16px" width="16px" v-if="image.favicon" style="margin-right:5px" v-bind:src="image.favicon"></img>
+            <a class="mdl-button mdl-js-button button-text button-link" target="_blank" v-bind:href="image.link">
+                <img height="16px" width="16px" v-if="image.favicon" style="margin-right:5px" v-bind:src="image.favicon"></img>
                 <span class="link-text">{{image.link}}</span>
             </a>
         </div>
@@ -62,7 +68,8 @@
         <div class="item">
             <div class="place-holder"></div>
             <label class="mdl-checkbox mdl-js-checkbox item-checkbox" for="applyOnDesktopWallpaper" v-mdl>
-                <input id="applyOnDesktopWallpaper" type="checkbox" class="mdl-checkbox__input" v-mdl-check-refresh="{value:settings.applyOnDesktopWallpaper}" v-model="settings.applyOnDesktopWallpaper"/>
+                <input id="applyOnDesktopWallpaper" type="checkbox" class="mdl-checkbox__input" v-mdl-check-refresh="{value:settings.applyOnDesktopWallpaper}"
+                    v-model="settings.applyOnDesktopWallpaper" />
                 <span class="mdl-checkbox__label">{{getString(strings,'apply_on_desktop_wallpaper')}}</span>
             </label>
             <button class="mdl-button mdl-js-button mdl-button--icon collapse closed" v-on:click="collapse" v-mdl>
@@ -94,8 +101,9 @@
         <div class="item">
             <div class="place-holder"></div>
             <label class="mdl-checkbox mdl-js-checkbox" for="runInBackground" v-mdl>
-                    <input id="runInBackground" type="checkbox" class="mdl-checkbox__input" v-mdl-check-refresh="{value:settings.runInBackground}" v-model="settings.runInBackground"/>
-                    <span class="mdl-checkbox__label">{{getString(strings,'run_in_background')}}</span>
+                <input id="runInBackground" type="checkbox" class="mdl-checkbox__input" v-mdl-check-refresh="{value:settings.runInBackground}"
+                    v-model="settings.runInBackground" />
+                <span class="mdl-checkbox__label">{{getString(strings,'run_in_background')}}</span>
             </label>
         </div>
         <div class="item" />
