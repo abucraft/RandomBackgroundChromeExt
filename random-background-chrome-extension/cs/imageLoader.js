@@ -59,20 +59,19 @@ function afterRendered() {
     canvas.width = img.width;
     canvas.height = img.height;
     ctx.drawImage(img, 0, 0);
-    watchDom();
+    setButtonColor();
     var interval = setInterval(function () {
-        watchDom();
+        setButtonColor();
         setTimeout(function () {
             clearInterval(interval)
         }, MINUTE);
     }, 1000)
-    $(window).on('resize', watchDom);
+    $(window).on('resize', setButtonColor);
 }
 
 // check and change the corner text to white if background is dark
-function watchDom() {
-    changeElementFontColor($('#mngb > div > div > div'));
-    changeElementFontColor($('#setting-panel > .mdl-button'));
+function setButtonColor() {
+    changeElementFontColor($('#setting-panel > .top-left > .mdl-button'));
 }
 
 function changeElementFontColor(elm) {
