@@ -1,5 +1,4 @@
 chrome.runtime.sendMessage({ type: 'QUERY' }, function (response) {
-    console.log(response);
     onloadImage(response);
 })
 
@@ -10,7 +9,6 @@ var base64Url, imageType;
 
 async function onloadImage(data) {
     vm.image = data;
-    console.log(data);
     var imageSrc = data.url;
     if (data.data) {
         imageSrc = getImageSrcFromBase64(data.url, data.data);

@@ -1,4 +1,4 @@
-var CACHE_INTERVAL = 10000;
+const CACHE_INTERVAL = 10000;
 function loadCache() {
     chrome.runtime.sendMessage({ type: 'CACHE_REQUEST' }, async function (response) {
         if (response) {
@@ -15,4 +15,5 @@ function loadCache() {
 }
 
 loadCache();
-setInterval(loadCache, CACHE_INTERVAL);
+setTimeout(loadCache, CACHE_INTERVAL);
+setTimeout(loadCache, CACHE_INTERVAL * 2);
