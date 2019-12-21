@@ -1,8 +1,8 @@
 {
     "appName": {
-        "message": "随机新标签页背景"
+        "message": "随机新标签页图片"
     },
     "appDesc": {
-        "message": "从bing, pixiv, artstation和自定义网址中随机选择图片作为新标签页的背景!"
+        "message": "从bing, flickr, artstation和自定义网址中随机选择图片作为新标签页的背景! 会替换原来的默认标签页。"
     }
 }

@@ -1,8 +1,8 @@
 {
     "appName": {
-        "message": "Random Newtab Background"
+        "message": "Random Newtab Image"
     },
     "appDesc": {
-        "message": "Set chrome new tab background image which is choosed from bing, artstation, pixiv and even your customed links randomly!"
+        "message": "Set chrome new tab image which is choosed from bing, artstation, flickr! Will replace the original default tab."
     }
 }
