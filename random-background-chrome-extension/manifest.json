@@ -11,10 +11,9 @@
         "default_icon": "icon.png"
     },
     "permissions": [
-        "<all_urls>",
-        "webRequestBlocking",
-        "webRequest",
-        "tabs",
+        "https://*.flickr.com/*",
+        "https://*.artstation.com/*",
+        "https://*.bing.com/*",
         "contextMenus",
         "nativeMessaging"
     ],
@@ -34,8 +33,7 @@
             "bg/bingImageUrl.js",
             "bg/artstationImageUrl.js",
             "bg/flickrImageUrl.js",
-            "bg/background.js",
-            "bg/headerModifier.js"
+            "bg/background.js"
         ]
     },
     "web_accessible_resources": [
