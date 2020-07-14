@@ -15,7 +15,7 @@ async function onloadImage(data) {
         base64Url = imageSrc;
         imageType = mapImageType(data.url);
     }
-    $(`<style id="rbkstyle" type="text/css">body{ background-image:url(${imageSrc}) !important;background-size:cover !important; }  </style>`).appendTo($('body'));
+    $(`<style id="rbkstyle" type="text/css">body{ background-image:url(${imageSrc}) !important;background-size:cover !important; background-position-x: center; background-position-y: center; }  </style>`).appendTo($('body'));
     img.onload = function () {
         afterRendered();
     }
