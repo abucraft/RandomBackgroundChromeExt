@@ -15,9 +15,11 @@ async function onloadImage(data) {
         base64Url = imageSrc;
         imageType = mapImageType(data.url);
     }
-    $(`<style id="rbkstyle" type="text/css">body{ background-image:url(${imageSrc}) !important;background-size:cover !important; background-position-x: center; background-position-y: center; }  </style>`).appendTo($('body'));
+    $('body').css("background-image", `url(${imageSrc}`).css('background-size', 'cover')
+        .css("background-position-x", "0%").css('background-position-y', "0%")
     img.onload = function () {
         afterRendered();
+        // adjustBackgroundLocationAccordingToFace();
     }
     if (data.data) {
         img.src = getImageSrcFromBase64(data.url, data.data);
@@ -51,6 +53,54 @@ function mapImageType(url) {
 
 function getImageSrcFromBase64(url, data) {
     return `data:image/${mapImageType(url)};base64,` + data;
+}
+
+var backgroundXPercent = 0
+var backgroundYPercent = 0
+
+var boundingRect = null
+
+// Not useful for artstation images
+function adjustBackgroundLocationAccordingToFace() {
+    var tracker = new tracking.ObjectTracker('face');
+
+    tracking.track(img, tracker);
+
+    tracker.on('track', function (event) {
+        if (event.data.length) {
+            var left = img.width
+            var top = img.height
+            var right = 0
+            var bottom = 0
+            event.data.forEach(function (rect) {
+                if (rect.x < left) {
+                    left = rect.x
+                }
+                if (rect.y < top) {
+                    top = rect.y
+                }
+                if ((rect.x + rect.width) > right) {
+                    right = rect.x + rect.width
+                }
+                if ((rect.y + rect.height) > bottom) {
+                    bottom = rect.y + rect.height
+                }
+            });
+            boundingRect = {
+                left, top, width: right - left, height: bottom - top
+            }
+            // backgroundXPercent = ((right + left) / 2) / img.width
+            // backgroundYPercent = ((top + bottom) / 2) / img.height
+            // $('body').css("background-position-x", `${backgroundXPercent * 100}%`)
+            // $('body').css("background-position-y", `${backgroundYPercent * 100}%`)
+            event.data.forEach(function (rect) {
+                var windowRect = imageRectToWindow({ left: rect.x, top: rect.y, width: rect.width, height: rect.height })
+                $('body').append(`<div style="position:fixed;border:3px solid green; left:${windowRect.left}px; top:${windowRect.top}px; width:${windowRect.width}px; height:${windowRect.height}px"></div>`)
+            })
+            var windowRect = imageRectToWindow(boundingRect)
+            $('body').append(`<div style="position:fixed;border:3px solid green; left:${windowRect.left}px; top:${windowRect.top}px; width:${windowRect.width}px; height:${windowRect.height}px"></div>`)
+        }
+    });
 }
 
 function afterRendered() {
@@ -115,12 +165,52 @@ function element2ImageRect(elm) {
         var imgWidth = img.width;
         var imgHeight = img.height;
         var rect = {};
-        var scale = windowWidth / imgWidth;
-        rect.left = elmRect.left / scale;
-        rect.top = elmRect.top / scale;
+        var scaleX = windowWidth / imgWidth;
+        var scaleY = windowHeight / imgHeight
+        var scale = Math.max(scaleX, scaleY)
+        var imgRatio = imgWidth / imgHeight
+        var windowRatio = windowWidth / windowHeight
+        var offsetXPercent = 0
+        var offsetYPercent = 0
+        if (imgRatio > windowRatio) {
+            offsetXPercent = Math.min(imgRatio / windowRatio - 1, Math.max(0, backgroundXPercent * imgRatio / windowRatio - 0.5))
+        } else {
+            offsetYPercent = Math.min(windowRatio / imgRatio - 1, Math.max(0, backgroundYPercent * windowRatio / imgRatio - 0.5))
+        }
+        var offsetX = offsetXPercent * windowWidth
+        var offsetY = offsetYPercent * windowHeight
+        rect.left = (elmRect.left + offsetX) / scale;
+        rect.top = (elmRect.top + offsetY) / scale;
         rect.width = elmRect.width / scale;
         rect.height = elmRect.height / scale;
         return rect;
     }
     return null;
+}
+
+function imageRectToWindow(rect) {
+    var windowHeight = window.innerHeight;
+    var windowWidth = window.innerWidth;
+    var imgWidth = img.width;
+    var imgHeight = img.height;
+    var windowRect = {}
+    var scaleX = windowWidth / imgWidth;
+    var scaleY = windowHeight / imgHeight
+    var scale = Math.max(scaleX, scaleY)
+    var imgRatio = imgWidth / imgHeight
+    var windowRatio = windowWidth / windowHeight
+    var offsetXPercent = 0
+    var offsetYPercent = 0
+    if (imgRatio > windowRatio) {
+        offsetXPercent = Math.min(imgRatio / windowRatio - 1, Math.max(0, backgroundXPercent * imgRatio / windowRatio - 0.5))
+    } else {
+        offsetYPercent = Math.min(windowRatio / imgRatio - 1, Math.max(0, backgroundYPercent * windowRatio / imgRatio - 0.5))
+    }
+    var offsetX = offsetXPercent * windowWidth
+    var offsetY = offsetYPercent * windowHeight
+    windowRect.left = rect.left * scale - offsetX;
+    windowRect.top = rect.top * scale - offsetY;
+    windowRect.width = rect.width * scale
+    windowRect.height = rect.height * scale
+    return windowRect
 }
